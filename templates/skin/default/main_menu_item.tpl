@@ -1,0 +1,1 @@
+<li {if $sAction=='catalog'}class="active"{/if}><a href="{router page='catalog'}">{$aLang.plugin.minimarket.catalog}</a> <i></i></li>

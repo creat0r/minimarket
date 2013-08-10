@@ -1,0 +1,1 @@
+<li {if $sMenuItemSelect=='product'}class="active"{/if}><a href="{router page='mm_product'}add/">{$aLang.plugin.minimarket.product_min}</a></li>
