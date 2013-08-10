@@ -4,10 +4,13 @@
         <lang name="default">miniMarket</lang>
     </name>
     <author>
-        <lang name="default">Stepanov Mark aka nikto</lang>
+        <lang name="default">Stepanov Mark</lang>
     </author>
     <homepage>http://altocms.ru/profile/nikto/</homepage>
     <version>0.1</version>
+	<alto>
+		<version>0.9.7.1</version>
+	</alto>
     <requires>
         <livestreet>1.0.3</livestreet>
         <plugins>
