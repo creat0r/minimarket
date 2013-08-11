@@ -12,9 +12,9 @@
 class PluginMinimarket_ModuleProduct_EntityProductPhoto extends Entity {
 
 	/**
-	 * Возвращает полный веб путь до фото определенного размера
+	 * Р’РѕР·РІСЂР°С‰Р°РµС‚ РїРѕР»РЅС‹Р№ РІРµР± РїСѓС‚СЊ РґРѕ С„РѕС‚Рѕ РѕРїСЂРµРґРµР»РµРЅРЅРѕРіРѕ СЂР°Р·РјРµСЂР°
 	 *
-	 * @param string|null $sWidth	Размер фото, например, '100' или '150crop'
+	 * @param string|null $sWidth	Р Р°Р·РјРµСЂ С„РѕС‚Рѕ, РЅР°РїСЂРёРјРµСЂ, '100' РёР»Рё '150crop'
 	 * @return null|string
 	 */
 	public function getProductPhotoWebPath($sWidth = null) {
