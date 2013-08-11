@@ -12,7 +12,7 @@
 class PluginMinimarket_ModuleProduct_EntityProduct extends Entity {
 
     /**
-     * Îïðåäåëÿåì ïðàâèëà âàëèäàöèè
+     * ÐžÐ¿Ñ€ÐµÐ´ÐµÐ»ÑÐµÐ¼ Ð¿Ñ€Ð°Ð²Ð¸Ð»Ð° Ð²Ð°Ð»Ð¸Ð´Ð°Ñ†Ð¸Ð¸
      */
     public function Init() {
         parent::Init();
@@ -68,7 +68,7 @@ class PluginMinimarket_ModuleProduct_EntityProduct extends Entity {
 	}
 	
     public function ValidateProductAttributAndProperty($aValue, $aParams) {
-		// âñå ëè ïðèøåäøèå ê íàì çíà÷åíèÿ ÿâëÿþòñÿ àòðèáóòàìè è ñâîéñòâàìè
+		// Ð²ÑÐµ Ð»Ð¸ Ð¿Ñ€Ð¸ÑˆÐµÐ´ÑˆÐ¸Ðµ Ðº Ð½Ð°Ð¼ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ ÑÐ²Ð»ÑÑŽÑ‚ÑÑ Ð°Ñ‚Ñ€Ð¸Ð±ÑƒÑ‚Ð°Ð¼Ð¸ Ð¸ ÑÐ²Ð¾Ð¹ÑÑ‚Ð²Ð°Ð¼Ð¸
         if(empty($aValue) || count($aValue)==$this->PluginMinimarket_Taxonomy_GetCountTaxonomyByArrayIdAndArrayType($aValue,array('attribut','property'))) {
             return true;
         }
@@ -200,7 +200,7 @@ class PluginMinimarket_ModuleProduct_EntityProduct extends Entity {
 		return $this->_getDataOne('product_manufacturer_code');
 	}
 		
-	// ýòîò ìåòîä íóæíî óäàëèòü, è çàìåíèòü åãî (âåçäå ãäå îí èñïîëüçóåòñÿ) íà PluginMinimarket_Product_GetArrayWebPathToProductByProducts
+	// ÑÑ‚Ð¾Ñ‚ Ð¼ÐµÑ‚Ð¾Ð´ Ð½ÑƒÐ¶Ð½Ð¾ ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ, Ð¸ Ð·Ð°Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ ÐµÐ³Ð¾ (Ð²ÐµÐ·Ð´Ðµ Ð³Ð´Ðµ Ð¾Ð½ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÑ‚ÑÑ) Ð½Ð° PluginMinimarket_Product_GetArrayWebPathToProductByProducts
 	public function getWebPathBuilder(){
 		$aCategoriesByProduct=$this->PluginMinimarket_Taxonomy_GetChainsByArrayCategories(array($this->PluginMinimarket_Taxonomy_GetTaxonomyById($this->getCategory())));
 		$sWebPathProduct=Config::Get('path.root.url').'catalog/';
@@ -213,3 +213,4 @@ class PluginMinimarket_ModuleProduct_EntityProduct extends Entity {
 	}
 	
 }
+?>
