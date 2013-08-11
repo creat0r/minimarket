@@ -323,9 +323,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
 	}
 	
     /**
-     * Получить список изображений по временному коду
+     * РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РёР·РѕР±СЂР°Р¶РµРЅРёР№ РїРѕ РІСЂРµРјРµРЅРЅРѕРјСѓ РєРѕРґСѓ
      *
-     * @param string $sTargetTmp    Временный ключ
+     * @param string $sTargetTmp    Р’СЂРµРјРµРЅРЅС‹Р№ РєР»СЋС‡
      *
      * @return array
      */
@@ -342,9 +342,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
     }
 	
     /**
-     * Обновить данные по изображению
+     * РћР±РЅРѕРІРёС‚СЊ РґР°РЅРЅС‹Рµ РїРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЋ
      *
-     * @param PluginMinimarket_ModuleProduct_EntityProductPhoto $oPhoto Объект фото
+     * @param PluginMinimarket_ModuleProduct_EntityProductPhoto $oPhoto РћР±СЉРµРєС‚ С„РѕС‚Рѕ
      *
      * @return  bool
      */
@@ -371,11 +371,11 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
     }
 	
     /**
-     * Получить список изображений по id продукта
+     * РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РёР·РѕР±СЂР°Р¶РµРЅРёР№ РїРѕ id РїСЂРѕРґСѓРєС‚Р°
      *
-     * @param int      $iProductId	ID продукта
-     * @param int|null $iFromId     ID с которого начинать выборку
-     * @param int|null $iCount      Количество
+     * @param int      $iProductId	ID РїСЂРѕРґСѓРєС‚Р°
+     * @param int|null $iFromId     ID СЃ РєРѕС‚РѕСЂРѕРіРѕ РЅР°С‡РёРЅР°С‚СЊ РІС‹Р±РѕСЂРєСѓ
+     * @param int|null $iCount      РљРѕР»РёС‡РµСЃС‚РІРѕ
      *
      * @return array
      */
@@ -393,9 +393,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
     }
 	
     /**
-     * Получить число изображений по id продукта
+     * РџРѕР»СѓС‡РёС‚СЊ С‡РёСЃР»Рѕ РёР·РѕР±СЂР°Р¶РµРЅРёР№ РїРѕ id РїСЂРѕРґСѓРєС‚Р°
      *
-     * @param string $sTargetTmp    Временный ключ
+     * @param string $sTargetTmp    Р’СЂРµРјРµРЅРЅС‹Р№ РєР»СЋС‡
      *
      * @return int
      */
@@ -407,9 +407,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
     }
 	
     /**
-     * Получить число изображений по id продукта
+     * РџРѕР»СѓС‡РёС‚СЊ С‡РёСЃР»Рѕ РёР·РѕР±СЂР°Р¶РµРЅРёР№ РїРѕ id РїСЂРѕРґСѓРєС‚Р°
      *
-     * @param int $iProductId    ID продукта
+     * @param int $iProductId    ID РїСЂРѕРґСѓРєС‚Р°
      *
      * @return int
      */
@@ -421,9 +421,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
     }
 	
     /**
-     * Добавить к продукту изображение
+     * Р”РѕР±Р°РІРёС‚СЊ Рє РїСЂРѕРґСѓРєС‚Сѓ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
      *
-     * @param PluginMinimarket_ModuleProduct_EntityProductPhoto $oPhoto    Объект фото
+     * @param PluginMinimarket_ModuleProduct_EntityProductPhoto $oPhoto    РћР±СЉРµРєС‚ С„РѕС‚Рѕ
      *
      * @return bool
      */
@@ -445,9 +445,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
     }
 	
     /**
-     * Возвращает список фотографий по списку id фоток
+     * Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє С„РѕС‚РѕРіСЂР°С„РёР№ РїРѕ СЃРїРёСЃРєСѓ id С„РѕС‚РѕРє
      *
-     * @param array $aPhotoId    Список ID фото
+     * @param array $aPhotoId    РЎРїРёСЃРѕРє ID С„РѕС‚Рѕ
      *
      * @return array
      */
@@ -473,9 +473,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
     }
 	
     /**
-     * Удалить изображение
+     * РЈРґР°Р»РёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
      *
-     * @param int $iPhotoId    ID фото
+     * @param int $iPhotoId    ID С„РѕС‚Рѕ
      */
     public function deleteProductPhoto($iPhotoId) {
         $sql = "DELETE FROM " . Config::Get('db.table.minimarket_product_photo') . 
@@ -484,9 +484,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
     }
 	
     /**
-     * Удаляет продукт
+     * РЈРґР°Р»СЏРµС‚ РїСЂРѕРґСѓРєС‚
      *
-     * @param   int   $nId - ID товара
+     * @param   int   $nId - ID С‚РѕРІР°СЂР°
      *
      * @return  bool
      */
