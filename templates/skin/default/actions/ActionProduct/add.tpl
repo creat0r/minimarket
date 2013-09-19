@@ -50,7 +50,19 @@
 
 	<p><label for="product_price">{$aLang.plugin.minimarket.product_create_price}:</label>
 	<input type="text" id="product_price" name="product_price" value="{$_aRequest.product_price}" class="input-text input-width-full" /></p>
+
+	<p><label for="product_weight">{$aLang.plugin.minimarket.product_create_weight}:</label>
+	<input type="text" id="product_weight" name="product_weight" value="{$_aRequest.product_weight}" class="input-text input-width-full" />
+	<small class="note">{$aLang.plugin.minimarket.product_create_weight_notice}</small></p>
+	{*
+	<p><label><input type="checkbox" id="product_show" name="product_show" class="input-checkbox" value="1" {if $_aRequest.product_show==1}checked{/if} />
+	{$aLang.plugin.minimarket.product_create_show}</label>
+	<small class="note">{$aLang.plugin.minimarket.product_create_show_notice}</small></p>
 	
+	<p><label><input type="checkbox" id="product_in_stock" name="product_in_stock" class="input-checkbox" value="1" {if $_aRequest.product_in_stock==1}checked{/if} />
+	{$aLang.plugin.minimarket.product_create_in_stock}</label>
+	<small class="note">{$aLang.plugin.minimarket.product_create_in_stock_notice}</small></p>
+	*}
 	<p><label for="product_brand">{$aLang.plugin.minimarket.product_create_brand}:</label>
 	<select name="product_brand" id="product_brand" class="input-width-full">
 		<option value="0"{if !$_aRequest.product_brand} selected{/if}>{$aLang.plugin.minimarket.product_create_brand_no}</option>

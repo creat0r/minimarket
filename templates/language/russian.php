@@ -9,6 +9,10 @@
 ---------------------------------------------------------
 */
 
+/**
+ * Русский языковой файл.
+ * Содержит все текстовки плагина.
+ */
 return array(
 	'shop' => 'Магазин',
 	'attributes' => 'Атрибуты',
@@ -132,6 +136,13 @@ return array(
 	'product_characteristics' => 'Характеристики',
 	'product_technical_characteristics' => 'Технические характеристики',
 	'product_features' => 'Особенности',
+	'product_buy' => 'Купить',
+	'product_create_weight' => 'Вес',
+	'product_create_weight_notice' => 'Необходим для расчета доставки. Указывается в килограммах. Например: 2.45',
+	'product_create_show' => 'Показывать в магазине',
+	'product_create_show_notice' => 'Если отметить эту галку, то товар будет отображаться в магазине.',
+	'product_create_in_stock' => 'Товар в наличии',
+	'product_create_in_stock_notice' => 'Если отметить эту галку, то данный товар можно будет купить.',
 	'price_compare' => 'Сравнить цены',
 	'attributes_category' => 'Категории атрибутов',
 	'adding_attribut_category_ok' => 'Категория атрибутов успешно добавлена',
@@ -152,6 +163,172 @@ return array(
 	'product_photoset_is_preview' => 'Отмечено как превью к товару',
 	'product_not' => 'Тут пока нет ни одного товара',
 	'category_not' => 'Тут пока нет ни одной категории',
+	/**
+	 * Админка. Заказы
+	 */
+	'orders' => 'Заказы',
+	'order_number' => 'ID',
+	'order_user_data' => 'Данные клиента',
+	'order_delivery_service' => 'Способ доставки',
+	'order_pay_system' => 'Способ оплаты',
+	'order_date' => 'Дата',
+	'order_status' => 'Статус',
+	'order_action' => 'Действие',
+	'order_edit' => 'Редактировать',
+	'order_detele_confirm' => 'Вы действительно хотите удалить данный заказ?',
+	'order_remove' => 'Удалить',
+	'order_edit_title' => 'Редактирование заказа',
+	'order_client_name' => 'Имя',
+	'order_information' => 'Информация о заказе',
+	'order_client_index' => 'Индекс',
+	'order_client_address' => 'Адрес',
+	'order_client_phone' => 'Телефон',
+	'order_client_comment' => 'Комментарий',
+	'order_city' => 'Город',
+	'admin_order_delivery' => 'Доставка',
+	'admin_order_pay' => 'Оплата',
+	'admin_order_select_delivery' => 'Выберите службу доставки',
+	'admin_order_select_pay' => 'Выберите систему оплаты',
+	'admin_order_delivery_time' => 'Сроки доставки (дней)',
+	'admin_order_delivery_time_from' => 'от',
+	'admin_order_delivery_time_to' => 'до',
+	'admin_order_products' => 'Товары',
+	'admin_order_purchase' => 'Покупка',
+	'admin_order_purchase' => 'Покупка',
+	'admin_order_count' => 'Количество',
+	'admin_order_cost' => 'Стоимость',
+	'admin_order_submit' => 'Сохранить',
+	'admin_order_delete' => 'Удалить заказ',
+	'admin_order_cart_sum' => 'Стоимость товаров',
+	'admin_order_delivery_service_sum' => 'Стоимость доставки',
+	'admin_order_status_label' => 'Статус',
+	'admin_order_status_formation' => 'Формирование',
+	'admin_order_status_adopted' => 'Принят, ожидается оплата',
+	'admin_order_status_paid' => 'Оплачен, ожидает доставки',
+	'admin_order_status_ok' => 'Выполнен',
+	/**
+	 * Службы доставки
+	 */
+	'delivery_services' => 'Службы доставки',
+	'delivery_services_settings' => 'Настройки служб доставки',
+	'delivery_service_add' => 'Добавить новую службу доставки',
+	'delivery_service_adding' => 'Добавление новой службы доставки',
+	'delivery_service_adding_name' => 'Название',
+	'delivery_service_adding_name_example' => 'Например, <b>Доставка курьером</b>',
+	'delivery_service_adding_activation' => 'Активная',
+	'delivery_service_adding_location_gropus' => 'Группы местоположений',
+	'delivery_service_adding_delivery_time' => 'Сроки доставки (дней)',
+	'delivery_service_adding_from' => 'От',
+	'delivery_service_adding_to' => 'До',
+	'delivery_service_adding_weight' => 'Вес (кг)',
+	'delivery_service_adding_order_value' => 'Стоимость заказа',
+	'delivery_service_adding_description' => 'Описание',
+	'delivery_service_adding_processing_costs' => 'Взнос за обработку заказа',
+	'delivery_service_adding_cost_calculation' => 'Расчет стоимости заказа',
+	'delivery_service_adding_cost_calculation_error' => 'Выберите форму расчета стоимости заказа',
+	'delivery_service_adding_cost_calculation_all_order' => 'За весь заказ',
+	'delivery_service_adding_cost_calculation_each_item' => 'За каждый товар',
+	'delivery_service_adding_cost_calculation_weight' => 'По весу (указывается стоимость за 1 кг.)',
+	'delivery_service_adding_cost' => 'Стоимость',
+	'delivery_service_adding_cost_error' => 'Стоимость может состоять из 5 знаков до и 2-х после запятой. Так же можно указать знак процента (%) в конце значения.',
+	'delivery_service_adding_cost_example' => 'Например, <b>2.35</b> (либо, можно указать процент от суммы: <b>2.35%</b>)',
+	'delivery_service_adding_location_group_error' => 'Необходимо выбрать хотя бы одну группу местоположений',
+	'delivery_service_adding_pay_system_error' => 'Необходимо выбрать хотя бы одну систему оплаты',
+	'delivery_service_adding_pay_systems' => 'Системы оплаты',
+	'delivery_service_submit' => 'Отправить',
+	'delivery_service_name' => 'Название',
+	'delivery_service_actions' => 'Действие',
+	'delivery_service_edit' => 'Редактировать',
+	'delivery_service_edit_title' => 'Редактирование службы доставки',
+	'delivery_service_delete' => 'Удалить',
+	'delivery_service_detele_confirm' => 'Вы действительно хотите удалить данную службу доставки?',
+	'delivery_service_editing' => 'Редактирование службы доставки',
+	'delivery_service_tunable' => 'Настраиваемые',
+	'delivery_service_automatic' => 'Автоматические',
+	/**
+	 * Системы оплаты
+	 */
+	'pay_systems' => 'Системы оплаты',
+	'pay_system_edit' => 'Редактировать',
+	'pay_system_actions' => 'Действие',
+	'pay_system_name' => 'Название',
+	'pay_system_edit_title' => 'Редактирование системы оплаты',
+	/**
+	 * Система оплаты: Наличными
+	 */
+	'pay_system_cash_edit_title' => 'Редактирование системы оплаты: Наличными',
+	'pay_system_cash_submit' => 'Отправить',
+	'pay_system_cash_name' => 'Название',
+	'pay_system_cash_activation' => 'Активировать',
+	'pay_system_cash_name_error' => 'Название системы оплаты должно быть от 2 до 50 символов',
+	/**
+	 * Группы местоположений
+	 */
+	'location_groups' => 'Группы местоположений',
+	'location_group_add' => 'Добавить новую группу местоположений',
+	'location_group_name' => 'Название',
+	'location_group_actions' => 'Действие',
+	'location_group_edit' => 'Редактировать',
+	'location_group_delete' => 'Удалить',
+	'location_group_confirm' => 'Вы действительно хотите удалить данную группу местоположений?',
+	'location_group_adding' => 'Добавление новой группы местоположений',
+	'location_group_editing' => 'Редактирование группы местоположений',
+	'location_group_adding_name' => 'Название',
+	'location_group_adding_name_example' => 'Например, <b>Группа 1</b>',
+	'location_group_submit' => 'Отправить',
+	'location_group_adding_location' => 'Местоположения, входящие в группу',
+	'location_group_adding_name_error' => 'Название группы местоположений должно быть от 2 до 50 символов',
+	'location_group_adding_sity_id_error' => 'Не выбрано ни одно местоположение',
+	/**
+	 * Корзина
+	 */
+	'cart' => 'Корзина',
+	'cart_purchase' => 'Покупка',
+	'cart_count' => 'Количество',
+	'cart_price' => 'Стоимость',
+	'cart_delete' => 'Удалить',
+	'cart_summ' => 'Общая стоимость',
+	'cart_no' => 'Ваша корзина пуста, так как вы пока не выбрали ни один товар',
+	'cart_next' => 'Далее',
+	/**
+	 * Заказ: ввод адреса
+	 */
+	'order_next' => 'Далее',
+	'order_address_name' => 'Имя и фамилия',
+	'order_address_city' => 'Страна и город',
+	'order_address_index' => 'Почтовый индекс',
+	'order_address_address' => 'Адрес доставки',
+	'order_address_phone' => 'Телефон',
+	'order_address_comment' => 'Комментарий по доставке',
+	'order_address_city_error' => 'Необходимо выбрать город доставки',
+	/**
+	 * Заказ: доставка
+	 */
+	'order_delivery' => 'Доставка',
+	'order_delivery_methods' => 'Способ доставки',
+	'order_delivery_table_name' => 'Название',
+	'order_delivery_table_count' => 'Количество',
+	'order_delivery_table_cost' => 'Стоимость',
+	'order_delivery_days_count' => 'Срок в рабочих днях',
+	'order_delivery_cost' => 'Стоимость',
+	'order_delivery_from' => 'от',
+	'order_delivery_to' => 'до',
+	'order_delivery_sum' => 'Сумма к оплате',
+	'order_delivery_access_error' => 'Нет ни одной доступной службы доставки',
+	/**
+	 * Заказ: способы оплаты
+	 */
+	'order_pay_systems' => 'Способы оплаты',
+	'order_pay_systems_access_error' => 'Нет ни одной доступной системы оплаты',
+	/**
+	 * Заказ: оплата заказа
+	 */
+	'order_pay_order' => 'Оплата заказа',
+	/**
+	 * Заказ: заказ принят
+	 */
+	'order_ok_title' => 'Заказ принят',
+	'order_ok_message' => 'Ваш заказ принят. Спасибо.',
 );
 
 ?>

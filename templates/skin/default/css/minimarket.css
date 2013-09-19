@@ -23,6 +23,7 @@
 #product_img_main img{width:375px;}
 .product-price{float:right;text-align:center;}
 .product-price span{float:right;font-size:24px;}
+.product-buy-href{}
 .attributes-category-additionally-title{font-size:18px;padding-bottom:10px;}
 
 .catalog-product-table tr{vertical-align:top;margin-bottom:30px;display:block;}
@@ -31,6 +32,7 @@
 .catalog-product-href-title{line-height:100%;font-size:15px;color:#275EC2;}
 .catalog-product-href-title:hover{color:#3F8AD7;}
 .catalog-product-price{font-weight:bold;}
+.catalog-product-buy-href{margin-left:20px;font-weight:normal !important;}
 
 .catalog-product-features{line-height:120%;}
 .catalog-product-features a{color:#6E6D69;font-size:10px;text-decoration:none;}
@@ -65,9 +67,53 @@
 .catalog-main-child-ul{margin-left:20px;margin-bottom:10px;}
 .catalog-main-child-li{display:inline;margin-right:10px;}
 
+.admin-select-multiple{width:80%;}
+
+.cart thead th{text-align:left;font-weight:normal;padding:0 0 8px 0;}
+.cart td{vertical-align:top;}
+.cart-action{width:60px;padding:44px 18px 0 0;}
+.cart-action-href{color:#DA4242;}
+.cart-product{width:350px;padding:15px 0 16px 0;}
+.cart-product-photo{float:left;margin-right:10px;}
+.cart-product-photo-content{display:table-cell;vertical-align:middle;width:80px;height:80px;}
+.cart-product-photo-content img{max-width:80px;max-height:80px;}
+.cart-product-name{overflow:hidden;padding-right:45px;}
+.cart-product-name-href{color:#275EC2;font-size:15px;line-height:100%;}
+.cart-product-name-href:hover{color:#3F8AD7;}
+.cart-count{padding:26px 35px 16px 0;}
+.cart-price{padding-top:28px;font-size:15px;font-weight:bold;}
+.cart-count-input{width:60px;text-align:right;}
+.cart-final{font-size:15px;text-align:right;padding-bottom:30px;}
+.cart-final-price{font-weight:bold;}
+
+.order-title{font-size:22px;margin-bottom:30px;}
+
+.order-address td{vertical-align:top;}
+.order-address-label{width:150px;margin-right:20px;}
+
+.order-delivery{margin-bottom:30px;}
+.order-delivery th{font-weight:normal;text-align:left;}
+.order-delivery td{padding-top:10px;}
+.order-delivery-product-name-href{color:#275EC2;font-size:15px;}
+.order-delivery-product-name-href:hover{color:#3F8AD7;}
+.order-delivery-product-price,
+.order-delivery-price{font-size:15px;font-weight:bold;}
+.order-delivery-label{margin:0;}
+.order-delivery-comment{margin-left:20px;font-size:11px;}
+.order-delivert-final{font-size:15px;text-align:right;padding-top:30px !important;}
+.order-delivert-final-cost{font-weight:bold;}
+
+.order-pay-systems{margin-bottom:30px;}
+
 .mb-5{margin-bottom:5px;}
 .pt-15{padding-top:15px;}
 .pt-20{padding-top:20px;}
+.pt-30{padding-top:30px !important;}
+.pr-10{padding-right:10px !important;}
+.pr-30{padding-right:30px;}
+.pb-30{padding-bottom:30px;}
+.mr-5{margin-right:5px !important;}
+.mr-10{margin-right:10px !important;}
 .mr-30{margin-right:30px;}
 .float-right{float:right;}
 .float-left{float:left;}

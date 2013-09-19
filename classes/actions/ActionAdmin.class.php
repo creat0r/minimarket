@@ -40,17 +40,627 @@ class PluginMinimarket_ActionAdmin extends PluginMinimarket_Inherits_ActionAdmin
 		$this->AddEvent('mm_brand_edit','EventMmcbrandedit');
 		$this->AddEvent('mm_brand_delete','EventMmbranddelete');
 		
+		$this->AddEvent('mm_delivery_services','EventDeliveryServices');
+		$this->AddEvent('mm_delivery_service_add','EventDeliveryServiceAdd');
+		$this->AddEvent('mm_delivery_service_edit','EventDeliveryServiceEdit');
+		$this->AddEvent('mm_delivery_service_delete','EventDeliveryServiceDelete');
+		
+		$this->AddEvent('mm_delivery_services_automatic','EventDeliveryServicesAutomatic');
+		$this->AddEvent('mm_delivery_service_automatic_edit','EventDeliveryServiceAutomaticEdit');
+		
+		$this->AddEvent('mm_pay_systems','EventPaySystems');
+		$this->AddEvent('mm_pay_system_edit','EventPaySystemEdit');
+
+		$this->AddEvent('mm_location_groups','EventLocationGroups');
+		$this->AddEvent('mm_location_group_add','EventLocationGroupAdd');
+		$this->AddEvent('mm_location_group_edit','EventLocationGroupEdit');
+		$this->AddEvent('mm_location_group_delete','EventLocationGroupDelete');
+		
+		$this->AddEvent('mm_orders','EventOrders');
+		$this->AddEvent('mm_order_edit','EventOrderEdit');
+		$this->AddEvent('mm_order_delete','EventOrderDelete');
+		
 		$this->AddEvent('ajaxchangeordertaxonomies', 'EventAjaxChangeOrderTaxonomies');
 		
 		parent::RegisterEvent();
 	}
 
+    public function EventOrderDelete() {
+        $this->Security_ValidateSendForm();
+        /**
+         * Получаем объект заказа
+         */
+        if (
+			!($aResult = $this->PluginMinimarket_Order_GetOrdersByFilter(array('id'=>$this->GetParam(0)), ''))
+			|| !isset($aResult['collection'][$this->GetParam(0)])
+		) {
+            return parent::EventNotFound();
+        }
+		$oOrder = $aResult['collection'][$this->GetParam(0)];
+		/**
+		 * Удаляем связи между заказом и товарами (т.е. полностью очищаем корзину)
+		 */
+		$this->PluginMinimarket_Order_DeleteCartObjectsByOrder($oOrder->getId());
+		/**
+		 * Удаляем заказ
+		 */
+        $this->PluginMinimarket_Order_DeleteOrder($oOrder->getId());
+        Router::Location('admin/mm_orders/');
+	}
+	
+    public function EventOrderEdit() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('orders/edit');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.order_edit_title'));
+        /**
+         * Получаем объект заказа
+         */
+        if (
+			!($aResult = $this->PluginMinimarket_Order_GetOrdersByFilter(array('id'=>$this->GetParam(0)), ''))
+			|| !isset($aResult['collection'][$this->GetParam(0)])
+		) {
+            return parent::EventNotFound();
+        }
+		$oOrder = $aResult['collection'][$this->GetParam(0)];
+		$this->Viewer_Assign('oOrder', $oOrder);
+		/**
+		 * Загружаем гео-объект привязки
+		 */
+		$oGeoTarget = $this->Geo_GetTargetByTarget('order', $oOrder->getId());
+		$this->Viewer_Assign('oGeoTarget', $oGeoTarget);
+		/**
+		 * Загружаем в шаблон список стран, регионов, городов
+		 */
+		$aCountries = $this->Geo_GetCountries(array(), array('sort' => 'asc'), 1, 300);
+		$this->Viewer_Assign('aGeoCountries', $aCountries['collection']);
+		if ($oGeoTarget) {
+			if ($oGeoTarget->getCountryId()) {
+				$aRegions = $this->Geo_GetRegions(
+					array('country_id' => $oGeoTarget->getCountryId()), array('sort' => 'asc'), 1, 500
+				);
+				$this->Viewer_Assign('aGeoRegions', $aRegions['collection']);
+			}
+			if ($oGeoTarget->getRegionId()) {
+				$aCities = $this->Geo_GetCities(
+					array('region_id' => $oGeoTarget->getRegionId()), array('sort' => 'asc'), 1, 500
+				);
+				$this->Viewer_Assign('aGeoCities', $aCities['collection']);
+			}
+		}
+		if ($oGeoTarget) {
+			/**
+			 * Загружаем в шаблон список доступных служб доставки (по выбранному городу)
+			 */
+			$this->Viewer_Assign('aDeliveryService', $this->PluginMinimarket_Delivery_GetActivationDeliveryServicesByCity($oGeoTarget->getCityId()));
+		}
+		/**
+		 * Загружаем в шаблон список доступныхсистем оплаты, относительно данного заказа
+		 */
+		$this->Viewer_Assign('aPaySystem', $this->PluginMinimarket_Pay_GetAvailablePaySystemsByOrder($oOrder));
+		/**
+		 * По объекту заказа получаем список ID товаров, с ним связанных
+		 */
+		$aCartObjects = $this->PluginMinimarket_Order_GetCartObjectsByOrder($oOrder->getId());
+		/**
+		 * По списку ID получаем массив товаров
+		 */
+		$aProducts = $this->PluginMinimarket_Product_GetProductsAdditionalData(array_keys($aCartObjects));
+		$this->Viewer_Assign('aProducts', $aProducts);
+		$this->Viewer_Assign('aCartObjects', $aCartObjects);
+		
+		$_REQUEST['client_name'] = $oOrder->getClientName();
+		$_REQUEST['client_index'] = $oOrder->getClientIndex();
+		$_REQUEST['client_address'] = $oOrder->getClientAddress();
+		$_REQUEST['client_phone'] = $oOrder->getClientPhone();
+		$_REQUEST['client_comment'] = $oOrder->getClientComment();
+		
+        /**
+         * Проверяем, отправлена ли форма с данными
+         */
+        if (isset($_REQUEST['submit'])) {
+			if (
+				!isPost('submit')
+				|| !$oOrder->getStatus()
+				|| !getRequest('status', null, 'post')
+			) {
+				return false;
+			}
+			/**
+			 * Проверяем пришедший статус
+			 */
+			if (!in_array(getRequest('status', null, 'post'), array(1, 2, 3))) {
+				$this->Message_AddErrorSingle($this->Lang_Get('system_error'),$this->Lang_Get('error'));
+				return false;
+			}
+			$oOrder->setStatus(getRequest('status', null, 'post'));
+			$this->PluginMinimarket_Order_AddOrUpdateOrder($oOrder);
+			Router::Location('admin/mm_orders/');
+		}
+	}
+	
+    public function EventOrders() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('orders/list');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.orders'));
+
+        // * Передан ли номер страницы
+        $nPage = $this->_getPageNum();
+				
+		$aResult = $this->PluginMinimarket_Order_GetOrdersByFilter(array(), '', $nPage, Config::Get('minimarket.admin.order.per_page'));
+        $aPaging = $this->Viewer_MakePaging($aResult['count'], $nPage, Config::Get('minimarket.admin.order.per_page'), 4,
+            Router::GetPath('admin') . 'mm_orders/');
+
+        /**
+         * Загружаем в шаблон заказы
+         */		
+		$this->Viewer_Assign('aOrder', $aResult['collection']);
+		$this->Viewer_Assign('aPaging', $aPaging);
+	}
+	
+    public function EventDeliveryServicesAutomatic() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('delivery_services/automatic/list');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.delivery_services'));
+        /**
+         * Загружаем в шаблон настраиваемые службы доставки
+         */
+		$this->Viewer_Assign('aDeliveryServices', $this->PluginMinimarket_Delivery_GetDeliveryServicesByType('automatic'));
+	}
+	
+    public function EventDeliveryServiceAutomaticEdit() {
+        /**
+         * Получаем объект службы доставки
+         */
+        if(
+			!($oDeliveryService = $this->PluginMinimarket_Delivery_GetDeliveryServiceById($this->GetParam(0)))
+			|| $oDeliveryService->getType() != 'automatic'
+		) {
+			return parent::EventNotFound();
+        }
+        switch ($oDeliveryService->getKey()) {
+			default:
+				/**
+				 * Для внешних служб доставки, реализованных отдельным плагином
+				 */
+				if(!$this->EditDeliveryServiceExternal($oDeliveryService)) return parent::EventNotFound();
+		}
+	}
+	
+    public function EditDeliveryServiceExternal($oDeliveryService) {
+		$bOK = false;
+		$sTitle = $this->Lang_Get('plugin.minimarket.delivery_service_edit_title');
+		/**
+		 * Запускаем выполнение хука
+		 */
+		$this->Hook_Run(
+			'minimarket_delivery_service_external_edit',
+			array('oDeliveryService'=>$oDeliveryService, 'bOK'=>&$bOK, 'sTitle'=>&$sTitle)
+		);
+		/**
+		 * Установка шаблона
+		 */
+		$this->SetTemplateAction('delivery_services/automatic/external');
+		$this->_setTitle($sTitle);
+        /**
+         * Получаем список групп местоположений
+         */		
+        $this->Viewer_Assign('aLocationGroups', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('location_group'));
+        /**
+         * Получаем список систем оплаты
+         */		
+        $this->Viewer_Assign('aPaySystems', $this->PluginMinimarket_Pay_GetAllPaySystems());
+		return $bOK;
+	}
+	
+    public function EventPaySystemEdit() {
+        /**
+         * Получаем объект системы оплаты
+         */
+        if (!($oPaySystem = $this->PluginMinimarket_Pay_GetPaySystemById($this->GetParam(0)))) {
+            return parent::EventNotFound();
+        }
+        switch ($oPaySystem->getKey()) {
+			case 'cash':
+				/**
+				 * Расчет наличными
+				 */
+				$this->EditPaySystemCash($oPaySystem);
+				break;
+			default:
+				/**
+				 * Для внешних систем оплаты, реализованных отдельным плагином
+				 */
+				if(!$this->EditPaySystemExternal($oPaySystem)) return parent::EventNotFound();
+		}
+	}
+	
+	protected function EditPaySystemExternal($oPaySystem) {
+		$bOK = false;
+		$sTitle = $this->Lang_Get('plugin.minimarket.pay_system_edit_title');
+		/**
+		 * Запускаем выполнение хуков
+		 */
+		$this->Hook_Run('minimarket_pay_system_external_edit', array('oPaySystem'=>$oPaySystem,'bOK'=>&$bOK,'sTitle'=>&$sTitle));
+		/**
+		 * Установка шаблона
+		 */
+		$this->SetTemplateAction('pay_systems/external');
+		$this->_setTitle($sTitle);
+		return $bOK;
+	}
+	
+	protected function EditPaySystemCash($oPaySystem) {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('pay_systems/cash');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.pay_system_cash_edit_title'));
+        /**
+         * Проверяем отправлена ли форма с данными
+         */
+        if (isset($_REQUEST['cash_submit'])) {
+			if (!isPost('cash_submit')) {
+				return false;
+			}
+			/**
+			 * Проверка корректности полей формы
+			 */
+			if (!$this->CheckPaySystemCashFields()) {
+				return false;
+			}
+			$oPaySystem->setKey('cash');
+			$oPaySystem->setName(getRequest('name'));
+			$oPaySystem->setActivation(getRequest('activation'));
+			if ($this->PluginMinimarket_Pay_AddOrUpdatePaySystem($oPaySystem)) {
+				Router::Location('admin/mm_pay_systems/?edit=success');
+			}
+        } else {
+            $_REQUEST['name'] = $oPaySystem->getName();
+            $_REQUEST['activation'] = $oPaySystem->getActivation();
+        }
+	}
+	
+    public function EventPaySystems() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('pay_systems/list');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.pay_systems'));
+        /**
+         * Получаем список групп местоположений
+         */
+        $this->Viewer_Assign('aPaySystems', $this->PluginMinimarket_Pay_GetAllPaySystems());
+	}
+	
+    public function EventLocationGroupDelete() {
+        $this->Security_ValidateSendForm();
+        if (!($oLocationGroup = $this->PluginMinimarket_Taxonomy_GetTaxonomyById($this->GetParam(0))) || $oLocationGroup->getTaxonomyType()!='location_group') {
+            return parent::EventNotFound();
+        }
+		/**
+		 * Удаляем связи местоположений
+		 */
+		$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oLocationGroup->getId(),'location_group_city');
+		/**
+		 * Удаляем группу местоположений
+		 */
+        $this->PluginMinimarket_Taxonomy_DeleteTaxonomy($oLocationGroup);
+        Router::Location('admin/mm_location_groups/');
+	}
+	
+    public function EventLocationGroupEdit() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('location_groups/add');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.location_group_editing'));
+        /**
+         * Получаем группу местоположений
+         */
+        if (!($oLocationGroup = $this->PluginMinimarket_Taxonomy_GetTaxonomyById($this->GetParam(0))) || $oLocationGroup->getTaxonomyType()!='location_group') {
+            return parent::EventNotFound();
+        }
+		$this->Viewer_Assign('oLocationGroup', $oLocationGroup);
+        /**
+         * Загружаем в шаблон список стран, регионов, городов
+         */
+		$aGeoCountries = $this->PluginMinimarket_Geo_GetCountriesByConfig();
+		$aGeoRegions = $this->PluginMinimarket_Geo_GetRegionsByCountries($aGeoCountries['id']);
+		$this->Viewer_Assign('aGeoCountries', $aGeoCountries['collection']);
+		$this->Viewer_Assign('aGeoRegions', $aGeoRegions['collection']);
+		$this->Viewer_Assign('aGeoCities', $this->PluginMinimarket_Geo_GetCitiesByRegions($aGeoRegions['id']));
+
+        /**
+         * Проверяем отправлена ли форма с данными
+         */
+        if (isset($_REQUEST['location_group_add_submit'])) {
+			/**
+			 * Проверка корректности полей формы
+			 */
+			if(!$this->CheckLocationGroupFields()) {
+				return false;
+			}
+			/**
+			 * Обновляем объект Группа местоположений
+			 */
+			$oLocationGroup->setName(getRequest('location_group_name'));
+
+			if($this->PluginMinimarket_Taxonomy_UpdateTaxonomy($oLocationGroup)) {
+				/**
+				 * Удаляем старые связи местоположений
+				 */
+				$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oLocationGroup->getId(),'location_group_city');
+				/**
+				 * Создаем объект каждого местоположения и добавляем в БД одним запросом
+				 */
+				$aCitiesId = getRequest('location_group_city_id');
+				if(!is_array($aCitiesId)) {
+					$aCitiesId = array($aCitiesId);
+				}
+				$aObjectCity = array();
+				foreach($aCitiesId as $idCity) {
+					$oLink = Engine::GetEntity('PluginMinimarket_ModuleLink_EntityLink');
+					$oLink->setObjectId((int)$idCity);
+					$oLink->setParentId($oLocationGroup->getId());
+					$oLink->setObjectType('location_group_city');
+					$aObjectCity[] = $oLink;
+				}
+				$this->PluginMinimarket_Link_AddLinks($aObjectCity);
+				Router::Location('admin/mm_location_groups/?edit=success');
+			}
+        } else {
+            $_REQUEST['location_group_name'] = $oLocationGroup->getName();
+            $_REQUEST['location_group_city_id'] = $this->PluginMinimarket_Link_GetLinksByParentAndType($oLocationGroup->getId(),'location_group_city');
+        }
+	}
+	
+    public function EventLocationGroupAdd() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('location_groups/add');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.location_group_adding'));
+				
+        /**
+         * Загружаем в шаблон список стран, регионов, городов
+         */
+		$aGeoCountries = $this->PluginMinimarket_Geo_GetCountriesByConfig();
+		$aGeoRegions = $this->PluginMinimarket_Geo_GetRegionsByCountries($aGeoCountries['id']);
+		$this->Viewer_Assign('aGeoCountries', $aGeoCountries['collection']);
+		$this->Viewer_Assign('aGeoRegions', $aGeoRegions['collection']);
+		$this->Viewer_Assign('aGeoCities', $this->PluginMinimarket_Geo_GetCitiesByRegions($aGeoRegions['id']));
+		
+        /**
+         * Проверяем отправлена ли форма с данными
+         */
+        if(!isPost('location_group_add_submit')) {
+            return false;
+        }
+		
+        /**
+         * Проверка корректности полей формы
+         */
+        if(!$this->CheckLocationGroupFields()) {
+            return false;
+        }
+
+        /**
+         * Создаем и добавляем в БД объект Группа местоположений
+         */		
+        $oLocationGroup = Engine::GetEntity('PluginMinimarket_ModuleTaxonomy_EntityTaxonomy');
+        $oLocationGroup->setTaxonomyType('location_group');
+        $oLocationGroup->setName(getRequest('location_group_name'));
+
+        if($nId = $this->PluginMinimarket_Taxonomy_AddTaxonomy($oLocationGroup)) {
+			/**
+			 * Создаем объект каждого местоположения и добавляем в БД одним запросом
+			 */
+			$aCitiesId = getRequest('location_group_city_id');
+			if(!is_array($aCitiesId)) {
+				$aCitiesId = array($aCitiesId);
+			}
+			$aObjectCity = array();
+			foreach($aCitiesId as $idCity) {
+				$oLink = Engine::GetEntity('PluginMinimarket_ModuleLink_EntityLink');
+				$oLink->setObjectId((int)$idCity);
+				$oLink->setParentId((int)$nId);
+				$oLink->setObjectType('location_group_city');
+				$aObjectCity[] = $oLink;
+			}
+			$this->PluginMinimarket_Link_AddLinks($aObjectCity);
+            Router::Location('admin/mm_location_groups/?add=success');
+        }
+	}
+	
+    public function EventLocationGroups() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('location_groups/groups');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.location_groups'));
+        /**
+         * Получаем список групп местоположений
+         */		
+        $this->Viewer_Assign('aLocationGroups', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('location_group'));
+	}
+
+    public function EventDeliveryServiceDelete() {
+        $this->Security_ValidateSendForm();
+		
+        /**
+         * Получаем объект службы доставки
+         */
+        if(
+			!($oDeliveryService = $this->PluginMinimarket_Delivery_GetDeliveryServiceById($this->GetParam(0)))
+			|| $oDeliveryService->getType() != 'tunable'
+		) {
+			return parent::EventNotFound();
+        }
+
+        $this->PluginMinimarket_Delivery_DeleteDeliveryService($oDeliveryService);
+        Router::Location('admin/mm_delivery_services/');
+	}
+	
+    public function EventDeliveryServiceEdit() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('delivery_services/tunable/add');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.delivery_service_editing'));
+        /**
+         * Получаем объект службы доставки
+         */
+        if(
+			!($oDeliveryService = $this->PluginMinimarket_Delivery_GetDeliveryServiceById($this->GetParam(0)))
+			|| $oDeliveryService->getType() != 'tunable'
+		) {
+			return parent::EventNotFound();
+        }
+        $this->Viewer_Assign('oDeliveryService', $oDeliveryService);
+        /**
+         * Получаем список групп местоположений
+         */		
+        $this->Viewer_Assign('aLocationGroups', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('location_group'));
+        /**
+         * Получаем список систем оплаты
+         */		
+        $this->Viewer_Assign('aPaySystems', $this->PluginMinimarket_Pay_GetAllPaySystems());
+        /**
+         * Проверяем, отправлена ли форма с данными
+         */
+        if (isset($_REQUEST['delivery_service_add_submit'])) {
+			$oDeliveryService->_setValidateScenario('service');
+			/**
+			 * Заполняем поля для валидации
+			 */
+			$oDeliveryService->setName(strip_tags(getRequestStr('name')));
+			$oDeliveryService->setActivation(getRequestStr('activation'));
+			$oDeliveryService->setTimeFrom(getRequestStr('time_from'));
+			$oDeliveryService->setTimeTo(getRequestStr('time_to'));
+			$oDeliveryService->setWeightFrom(getRequestStr('weight_from'));
+			$oDeliveryService->setWeightTo(getRequestStr('weight_to'));
+			$oDeliveryService->setOrderValueFrom(getRequestStr('order_value_from'));
+			$oDeliveryService->setOrderValueTo(getRequestStr('order_value_to'));
+			$oDeliveryService->setProcessingCosts(getRequestStr('processing_costs'));
+			$oDeliveryService->setCostCalculation(getRequestStr('cost_calculation'));
+			$oDeliveryService->setCost(getRequestStr('cost'));
+			$oDeliveryService->setDescription(getRequestStr('description'));
+			$oDeliveryService->setLocationGroups(getRequestPost('location_groups'));
+			$oDeliveryService->setPaySystems(getRequestPost('pay_systems'));
+			/**
+			 * Проверка корректности полей формы
+			 */
+			if(!$this->CheckDeliveryServiceFields($oDeliveryService)) {
+				return false;
+			}
+			/**
+			 * Обновляем службу доставки
+			 */			
+			if($this->PluginMinimarket_Delivery_UpdateDeliveryService($oDeliveryService)) {
+				Router::Location('admin/mm_delivery_services/?edit=success');
+			}
+        } else {
+			$_REQUEST['name'] = $oDeliveryService->getName();
+			$_REQUEST['activation'] = $oDeliveryService->getActivation();
+			$_REQUEST['time_from'] = $oDeliveryService->getTimeFrom();
+			$_REQUEST['time_to'] = $oDeliveryService->getTimeTo();
+			$_REQUEST['weight_from'] = $oDeliveryService->getWeightFrom();
+			$_REQUEST['weight_to'] = $oDeliveryService->getWeightTo();
+			$_REQUEST['order_value_from'] = $oDeliveryService->getOrderValueFrom();
+			$_REQUEST['order_value_to'] = $oDeliveryService->getOrderValueTo();
+			$_REQUEST['processing_costs'] = $oDeliveryService->getProcessingCosts();
+			$_REQUEST['cost_calculation'] = $oDeliveryService->getCostCalculation();
+			$_REQUEST['cost'] = $oDeliveryService->getCost();
+			$_REQUEST['description'] = $oDeliveryService->getDescription();
+			/**
+			 * Получаем список ID групп местоположений, связанных с данной службой доставки
+			 */
+			$_REQUEST['location_groups'] = $this->PluginMinimarket_Link_GetLinksByParentAndType($oDeliveryService->getId(),'delivery_service_location_group');
+			/**
+			 * Получаем список ID систем оплаты, связанных с данной службой доставки
+			 */
+			$_REQUEST['pay_systems'] = $this->PluginMinimarket_Link_GetLinksByParentAndType($oDeliveryService->getId(),'delivery_service_pay_system');
+        }
+	}
+	
+    public function EventDeliveryServiceAdd() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('delivery_services/tunable/add');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.delivery_service_adding'));
+        /**
+         * Получаем список групп местоположений
+         */		
+        $this->Viewer_Assign('aLocationGroups', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('location_group'));
+        /**
+         * Получаем список систем оплаты
+         */		
+        $this->Viewer_Assign('aPaySystems', $this->PluginMinimarket_Pay_GetAllPaySystems());
+        /**
+         * Проверяем отправлена ли форма с данными
+         */
+        if(!isPost('delivery_service_add_submit')) {
+            return false;
+        }
+		$oDeliveryService = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityService');
+		$oDeliveryService->_setValidateScenario('service');
+		/**
+		 * Заполняем поля для валидации
+		 */
+		$oDeliveryService->setName(strip_tags(getRequestStr('name')));
+		$oDeliveryService->setActivation(getRequestStr('activation'));
+		$oDeliveryService->setTimeFrom(getRequestStr('time_from'));
+		$oDeliveryService->setTimeTo(getRequestStr('time_to'));
+		$oDeliveryService->setWeightFrom(getRequestStr('weight_from'));
+		$oDeliveryService->setWeightTo(getRequestStr('weight_to'));
+		$oDeliveryService->setOrderValueFrom(getRequestStr('order_value_from'));
+		$oDeliveryService->setOrderValueTo(getRequestStr('order_value_to'));
+		$oDeliveryService->setProcessingCosts(getRequestStr('processing_costs'));
+		$oDeliveryService->setCostCalculation(getRequestStr('cost_calculation'));
+		$oDeliveryService->setCost(getRequestStr('cost'));
+		$oDeliveryService->setDescription(getRequestStr('description'));
+		$oDeliveryService->setLocationGroups(getRequestPost('location_groups'));
+		$oDeliveryService->setPaySystems(getRequestPost('pay_systems'));
+		$oDeliveryService->setType('tunable');
+        /**
+         * Проверка корректности полей формы
+         */
+        if(!$this->CheckDeliveryServiceFields($oDeliveryService)) {
+            return false;
+        }
+        /**
+         * Добавляем службу доставки в БД
+         */
+        if ($this->PluginMinimarket_Delivery_AddDeliveryService($oDeliveryService)) {
+            Router::Location('admin/mm_delivery_services/');
+        }
+	}
+	
+    public function EventDeliveryServices() {
+        /**
+         * Устанавливаем шаблон вывода
+         */
+		$this->SetTemplateAction('delivery_services/tunable/list');
+		$this->_setTitle($this->Lang_Get('plugin.minimarket.delivery_services'));
+        /**
+         * Загружаем в шаблон настраиваемые службы доставки
+         */
+		$this->Viewer_Assign('aDeliveryServices', $this->PluginMinimarket_Delivery_GetDeliveryServicesByType('tunable'));
+	}
+	
     public function EventAttributescategoryedit() {
         /**
          * Устанавливаем шаблон вывода
          */
         $this->_setTitle($this->Lang_Get('plugin.minimarket.attributes_category_edit_title'));
-        $this->SetTemplateAction('attributescategoryadd');	
+        $this->SetTemplateAction('attributescategoryadd');
         /**
          * Получаем аттрибут
          */
@@ -219,7 +829,7 @@ class PluginMinimarket_ActionAdmin extends PluginMinimarket_Inherits_ActionAdmin
             $_REQUEST['brand_name'] = $oBrand->getName();
             $_REQUEST['brand_url'] = $oBrand->getURL();
             $_REQUEST['brand_description'] = $oBrand->getDescription();
-        }	
+        }
 	}
 	
 	protected function SubmitBrandEdit($oBrand) {
@@ -654,6 +1264,37 @@ class PluginMinimarket_ActionAdmin extends PluginMinimarket_Inherits_ActionAdmin
         }
 	}
 	
+	protected function CheckDeliveryServiceFields($oDeliveryService) {
+		$this->Security_ValidateSendForm();
+		$bOk=true;
+		/**
+		 * Валидируем службу доставки
+		 */
+		if (!$oDeliveryService->_Validate()) {
+			$this->Message_AddError($oDeliveryService->_getValidateError(),$this->Lang_Get('error'));
+			$bOk=false;
+		}
+		return $bOk;
+	}
+	
+	protected function CheckLocationGroupFields() {
+        $this->Security_ValidateSendForm();
+
+        $bOk = true;
+
+        if (!func_check(getRequest('location_group_name', null, 'post'), 'text', 2, 50)) {
+            $this->Message_AddError($this->Lang_Get('plugin.minimarket.location_group_adding_name_error'), $this->Lang_Get('error'));
+            $bOk = false;
+        }
+
+        if (!count(getRequest('location_group_city_id', null, 'post'))) {
+            $this->Message_AddError($this->Lang_Get('plugin.minimarket.location_group_adding_sity_id_error'), $this->Lang_Get('error'));
+            $bOk = false;
+        }
+
+        return $bOk;
+	}
+	
 	protected function CheckAttributesCategoryFields($sEdit=null) {
         $this->Security_ValidateSendForm();
 
@@ -765,6 +1406,19 @@ class PluginMinimarket_ActionAdmin extends PluginMinimarket_Inherits_ActionAdmin
 		}
         if (!func_check(getRequest('brand_description', null, 'post'), 'text', 0, 4000)) {
             $this->Message_AddError($this->Lang_Get('plugin.minimarket.brand_description_error'), $this->Lang_Get('error'));
+            $bOk = false;
+        }
+
+        return $bOk;
+	}
+	
+	protected function CheckPaySystemCashFields() {
+        $this->Security_ValidateSendForm();
+
+        $bOk = true;
+		
+        if (!func_check(getRequest('name', null, 'post'), 'text', 2, 50)) {
+            $this->Message_AddError($this->Lang_Get('plugin.minimarket.pay_system_cash_name_error'), $this->Lang_Get('error'));
             $bOk = false;
         }
 

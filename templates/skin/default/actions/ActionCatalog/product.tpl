@@ -10,7 +10,10 @@
 		{/if}
 	</header>
 	<div class="product-img-container mb-30">
-		<div class="product-price"><div class="mb-30"><span>{if $oProduct->getPrice()}{number_format($oProduct->getPrice(),2,',',' ')} ${/if}</span></div></div>
+		<div class="product-price">
+			<div class="mb-30"><span>{number_format($oProduct->getPrice(),2,',',' ')} $</span></div>
+			<a class="product-buy-href" href="{cfg name='path.root.web'}cart/add/{$oProduct->getId()}/">{$aLang.plugin.minimarket.product_buy}</a>
+		</div>
 		{if count($aPhotos)}
 			<ul>
 				{foreach from=$aPhotos item=oPhoto}

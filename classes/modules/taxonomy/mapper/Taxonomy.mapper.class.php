@@ -225,7 +225,10 @@ class PluginMinimarket_ModuleTaxonomy_MapperTaxonomy extends Mapper {
         return null;
 	}
 	
-	public function GetCountTaxonomyByArrayIdAndArrayType($aId,$aType) {
+	public function GetCountTaxonomyByArrayIdAndArrayType($aId, $aType) {
+		if(!is_array($aId)) $aId=array($aId);
+		if(!is_array($aType)) $aType=array($aType);
+		if(empty($aId) || empty($aType)) return false;
         $sql = "SELECT
 						COUNT(*) as count
 					FROM

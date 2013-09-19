@@ -44,8 +44,25 @@ class PluginMinimarket_ModuleProduct_EntityProduct extends Entity {
             'on' => array('product')
         );
         $this->aValidateRules[] = array(
-            'product_price', 'number', 'max' => 999999, 'min' => 0,
+            'product_price', 'number', 'max' => 10000, 'min' => 0,
+			'allowEmpty' => false,
 			'label' => $this->Lang_Get('plugin.minimarket.product_create_price'),
+            'on' => array('product')
+        );
+        $this->aValidateRules[] = array(
+            'product_weight', 'number', 'max' => 1000, 'min' => 0,
+			'allowEmpty' => false,
+			'label' => $this->Lang_Get('plugin.minimarket.product_create_weight'),
+            'on' => array('product')
+        );
+        $this->aValidateRules[] = array(
+            'product_show', 'boolean',
+			'label' => $this->Lang_Get('plugin.minimarket.product_create_show'),
+            'on' => array('product')
+        );
+        $this->aValidateRules[] = array(
+            'product_in_stock', 'boolean',
+			'label' => $this->Lang_Get('plugin.minimarket.product_create_in_stock'),
             'on' => array('product')
         );
         $this->aValidateRules[] = array(
@@ -144,6 +161,18 @@ class PluginMinimarket_ModuleProduct_EntityProduct extends Entity {
 		$this->_aData['product_price']=$data;
 	}
 
+	public function setWeight($data){
+		$this->_aData['product_weight']=$data;
+	}
+
+	public function setShow($data){
+		$this->_aData['product_show']=$data;
+	}
+
+	public function setInStock($data){
+		$this->_aData['product_in_stock']=$data;
+	}
+
 	public function setManufacturerCode($data){
 		$this->_aData['product_manufacturer_code']=$data;
 	}
@@ -194,6 +223,18 @@ class PluginMinimarket_ModuleProduct_EntityProduct extends Entity {
 	
 	public function getPrice(){
 		return $this->_getDataOne('product_price');
+	}
+	
+	public function getWeight(){
+		return $this->_getDataOne('product_weight');
+	}
+	
+	public function getShow(){
+		return $this->_getDataOne('product_show');
+	}
+	
+	public function getInStock(){
+		return $this->_getDataOne('product_in_stock');
 	}
 	
 	public function getManufacturerCode(){

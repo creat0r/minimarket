@@ -1,0 +1,1 @@
+{hook run='minimarket_pay_system_external_edit'}

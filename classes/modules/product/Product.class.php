@@ -260,25 +260,29 @@ class PluginMinimarket_ModuleProduct extends Module {
 		$aWebPathToProduct=array();
 		$aCategories=$this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('category');
 		foreach($aProducts as $oProduct) {
-			$aWebPathToProduct[$oProduct->getId()]=Config::Get('path.root.url').'catalog/';
+			$aWebPathToProduct[$oProduct->getId()] = Config::Get('path.root.url').'catalog/';
 			$bOK=false;
-			$oCategory=$aCategories[$oProduct->getCategory()];
-			$aResult=array();
-			for( ; ; ) {
-				$aResult[]=$oCategory->getURL();
-				if($oCategory->getParent()==0) {
-					$bOK=true;
-				} else {
-					$oCategory=$aCategories[$oCategory->getParent()];
-				}
-				if($bOK===true) {
-					$aResult=array_reverse($aResult);
-					foreach($aResult as $sResult) {
-						$aWebPathToProduct[$oProduct->getId()].=$sResult.'/';
+			if (isset($aCategories[$oProduct->getCategory()])) {
+				$oCategory=$aCategories[$oProduct->getCategory()];
+				$aResult=array();
+				for( ; ; ) {
+					$aResult[]=$oCategory->getURL();
+					if($oCategory->getParent()==0) {
+						$bOK=true;
+					} else {
+						$oCategory=$aCategories[$oCategory->getParent()];
 					}
-					$aWebPathToProduct[$oProduct->getId()].=$oProduct->getURL().'/';
-					break;
+					if($bOK===true) {
+						$aResult=array_reverse($aResult);
+						foreach($aResult as $sResult) {
+							$aWebPathToProduct[$oProduct->getId()].=$sResult.'/';
+						}
+						$aWebPathToProduct[$oProduct->getId()].=$oProduct->getURL().'/';
+						break;
+					}
 				}
+			} else {
+				$aWebPathToProduct[$oProduct->getId()] .= $oProduct->getURL().'/';
 			}
 		}
 		return $aWebPathToProduct;

@@ -41,6 +41,9 @@ class PluginMinimarket extends Plugin {
         'action' => array(
             'ActionAdmin'
         ),
+        'module' => array(
+            'ModuleGeo'
+        ),
     );
     protected $aDelegates = array(
         'template' => array(

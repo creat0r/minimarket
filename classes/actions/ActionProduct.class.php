@@ -272,6 +272,9 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 			$_REQUEST['product_manufacturer_code'] = $oProduct->getManufacturerCode();
 			$_REQUEST['product_url'] = $oProduct->getURL();
 			$_REQUEST['product_price'] = $oProduct->getPrice();
+			$_REQUEST['product_weight'] = $oProduct->getWeight();
+			$_REQUEST['product_show'] = $oProduct->getShow();
+			$_REQUEST['product_in_stock'] = $oProduct->getInStock();
 			$_REQUEST['product_brand'] = $oProduct->getBrand();
 			$_REQUEST['product_category'] = $oProduct->getCategory();
 			
@@ -347,6 +350,9 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 		$oProduct->setManufacturerCode(getRequestStr('product_manufacturer_code'));
 		$oProduct->setURL(getRequestStr('product_url'));
 		$oProduct->setPrice(getRequestStr('product_price'));
+		$oProduct->setWeight(getRequestStr('product_weight'));
+		$oProduct->setShow(getRequestStr('product_show'));
+		$oProduct->setInStock(getRequestStr('product_in_stock'));	
 		$oProduct->setBrand(getRequestStr('product_brand'));
 		$oProduct->setCategory(getRequestStr('product_category'));
 		
@@ -435,6 +441,9 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 		$oProduct->setManufacturerCode(getRequestStr('product_manufacturer_code'));
 		$oProduct->setURL(getRequestStr('product_url'));
 		$oProduct->setPrice(getRequestStr('product_price'));
+		$oProduct->setWeight(getRequestStr('product_weight'));
+		$oProduct->setShow(getRequestStr('product_show'));
+		$oProduct->setInStock(getRequestStr('product_in_stock'));
 		$oProduct->setBrand(getRequestStr('product_brand'));
 		$oProduct->setCategory(getRequestStr('product_category'));
 		

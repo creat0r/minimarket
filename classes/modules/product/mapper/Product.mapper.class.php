@@ -19,16 +19,19 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
 			product_brand,
 			product_category,
 			product_price,
+			product_weight,
+			product_show,
+			product_in_stock,
 			product_main_photo_id,
 			product_text
 			)
-			VALUES(?,?,?,?d,?d,?d,?d,?)
+			VALUES(?,?,?,?d,?d,?,?,?,?,?d,?)
 		";
         $nId = $this->oDb->query(
             $sql, $oProduct->getName(), $oProduct->getManufacturerCode(), 
-			$oProduct->getURL(), $oProduct->getBrand(),
-			$oProduct->getCategory(), $oProduct->getPrice(),
-			$oProduct->getMainPhotoId(), $oProduct->getText()
+			$oProduct->getURL(), $oProduct->getBrand(), $oProduct->getCategory(), 
+			$oProduct->getPrice(), $oProduct->getWeight(), $oProduct->getShow(), 
+			$oProduct->getInStock(), $oProduct->getMainPhotoId(), $oProduct->getText()
         );
         if ($nId) {
             return $nId;
@@ -45,6 +48,9 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
 				product_brand = ?d,
 				product_category = ?d,
 				product_price = ?,
+				product_weight = ?,
+				product_show = ?d,
+				product_in_stock = ?d,
 				product_main_photo_id = ?d,
 				product_text = ?
 			WHERE
@@ -52,8 +58,8 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
 		";
         $bResult = $this->oDb->query(
             $sql, $oProduct->getName(), $oProduct->getManufacturerCode(), $oProduct->getURL(), $oProduct->getBrand(),
-			$oProduct->getCategory(), $oProduct->getPrice(), $oProduct->getMainPhotoId(),
-			$oProduct->getText(), $oProduct->getId()
+			$oProduct->getCategory(), $oProduct->getPrice(), $oProduct->getWeight(), 
+			$oProduct->getShow(), $oProduct->getInStock(), $oProduct->getMainPhotoId(), $oProduct->getText(), $oProduct->getId()
         );
 		return $bResult !== false;
 	}

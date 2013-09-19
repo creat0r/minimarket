@@ -1,0 +1,1 @@
+{hook run='minimarket_delivery_service_external_edit'}
