@@ -12,9 +12,10 @@
 class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 
     /**
-     * Р’РѕР·РІСЂР°С‰Р°РµС‚ Р·Р°РєР°Р· РїРѕ РєР»СЋС‡Сѓ
+     * Возвращает заказ по ключу
      *
-	 * @param string $sKey			РЈРЅРёРєР°Р»СЊРЅС‹Р№ РєР»СЋС‡ Р·Р°РєР°Р·Р°
+	 * @param string $sKey    Уникальный ключ заказа
+	 * 
      * @return PluginMinimarket_ModuleOrder_EntityOrder|bool
      */
 	public function GetOrderByKey($sKey) {
@@ -32,81 +33,91 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * Р”РѕР±Р°РІР»СЏРµС‚ Р»РёР±Рѕ РѕР±РЅРѕРІР»СЏРµС‚ (РµСЃР»Рё Р·Р°РїРёСЃСЊ СЃ С‚Р°РєРёРј РєР»СЋС‡РѕРј СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚) Р·Р°РєР°Р·
+     * Возвращает заказ по ID
      *
-	 * @param PluginMinimarket_ModuleOrder_EntityOrder $oOrder			РћР±СЉРµРєС‚ Р·Р°РєР°Р·Р°
+	 * @param string $iId    ID заказа
+	 *
+     * @return PluginMinimarket_ModuleOrder_EntityOrder|bool
+     */
+	public function GetOrderById($iId) {
+        $sql = "SELECT
+						*
+					FROM
+						" . Config::Get('db.table.minimarket_order') . "
+					WHERE
+						`id` = ?d
+					";
+        if ($aRow = $this->oDb->selectRow($sql, $iId)) {
+            return Engine::GetEntity('PluginMinimarket_ModuleOrder_EntityOrder', $aRow);
+        }
+        return false;
+	}
+	
+    /**
+     * Добавляет либо обновляет (если запись с таким ключом уже существует) заказ
+     *
+	 * @param PluginMinimarket_ModuleOrder_EntityOrder $oOrder    Объект заказа
+	 * 
      * @return bool
      */
 	public function AddOrUpdateOrder($oOrder) {
        $sql = "INSERT INTO " . Config::Get('db.table.minimarket_order') . "			
 			(
-			user_id,
+			`user_id`,
 			`key`,
-			cart_sum,
-			client_name,
-			client_index,
-			client_address,
-			client_phone,
-			client_comment,
-			delivery_service_id,
-			delivery_service_time_from,
-			delivery_service_time_to,
-			delivery_service_sum,
-			pay_system_id,
-			status,
-			`time`
+			`client_name`,
+			`client_index`,
+			`client_address`,
+			`client_phone`,
+			`client_comment`,
+			`delivery_service_id`,
+			`status`,
+			`time_order_init`,
+			`time_selected_pay_system`,
+			`time_payment_success`
 			)
-			VALUES(?d,?,?,?,?,?,?,?,?d,?d,?d,?,?d,?d,?d)
+			VALUES(?d,?,?,?,?,?,?,?d,?d,?d,?d,?d)
 			ON DUPLICATE KEY UPDATE 
-				user_id = ?d,
+				`user_id` = ?d,
 				`key` = ?,
-				cart_sum = ?,
-				client_name = ?,
-				client_index = ?,
-				client_address = ?,
-				client_phone = ?,
-				client_comment = ?,
-				delivery_service_id = ?d,
-				delivery_service_time_from = ?d,
-				delivery_service_time_to = ?d,
-				delivery_service_sum = ?,
-				pay_system_id = ?d,
-				status = ?d,
-				`time` = ?d
+				`client_name` = ?,
+				`client_index` = ?,
+				`client_address` = ?,
+				`client_phone` = ?,
+				`client_comment` = ?,
+				`delivery_service_id` = ?d,
+				`status` = ?d,
+				`time_order_init` = ?d,
+				`time_selected_pay_system` = ?d,
+				`time_payment_success` = ?d
 		";
         $bResult = $this->oDb->query(
             $sql, 
 			$oOrder->getUserId(),
 			$oOrder->getKey(),
-			$oOrder->getCartSum(),
 			$oOrder->getClientName(),
 			$oOrder->getClientIndex(),
 			$oOrder->getClientAddress(),
 			$oOrder->getClientPhone(),
 			$oOrder->getClientComment(),
 			$oOrder->getDeliveryServiceId(),
-			$oOrder->getDeliveryServiceTimeFrom(),
-			$oOrder->getDeliveryServiceTimeTo(),
-			$oOrder->getDeliveryServiceSum(),
-			$oOrder->getPaySystemId(),
 			$oOrder->getStatus(),
-			$oOrder->getTime(),
+			$oOrder->getTimeOrderInit(),
+			$oOrder->getTimeSelectedPaySystem(),
+			$oOrder->getTimePaymentSuccess(),
 			
 			$oOrder->getUserId(),
 			$oOrder->getKey(),
-			$oOrder->getCartSum(),
 			$oOrder->getClientName(),
 			$oOrder->getClientIndex(),
 			$oOrder->getClientAddress(),
 			$oOrder->getClientPhone(),
 			$oOrder->getClientComment(),
 			$oOrder->getDeliveryServiceId(),
-			$oOrder->getDeliveryServiceTimeFrom(),
-			$oOrder->getDeliveryServiceTimeTo(),
-			$oOrder->getDeliveryServiceSum(),
-			$oOrder->getPaySystemId(),
 			$oOrder->getStatus(),
-			$oOrder->getTime()
+			$oOrder->getTimeOrderInit(),
+			$oOrder->getTimeSelectedPaySystem(),
+			$oOrder->getTimePaymentSuccess()
         );
         if ($bResult !== false) {
             return true;
@@ -115,10 +126,10 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * Р’РѕР·РІСЂР°С‰Р°РµС‚ Р·Р°РїРёСЃСЊ РёР· РєРѕСЂР·РёРЅС‹ РїРѕ ID Р·Р°РєР°Р·Р° Рё ID С‚РѕРІР°СЂР°
+     * Возвращает запись из корзины по ID заказа и ID товара
      *
-	 * @param int $iOrder			ID Р·Р°РєР°Р·Р°
-	 * @param int $iProduct			ID С‚РѕРІР°СЂР°
+	 * @param int $iOrder      ID заказа
+	 * @param int $iProduct    ID товара
 	 * 
      * @return PluginMinimarket_ModuleOrder_EntityOrderCart|null
      */
@@ -137,9 +148,10 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * РћР±РЅРѕРІР»СЏРµС‚ Р·Р°РїРёСЃСЊ РІ РєРѕСЂР·РёРЅРµ
+     * Обновляет запись в корзине
      *
-	 * @param PluginMinimarket_ModuleOrder_EntityOrderCart $oCart			РћР±СЉРµРєС‚ Р·Р°РїРёСЃРё РІ РєРѕСЂР·РёРЅРµ
+	 * @param PluginMinimarket_ModuleOrder_EntityOrderCart $oCart    Объект записи в корзине
+	 * 
      * @return bool
      */
 	public function UpdateCartObject($oCart) {
@@ -156,9 +168,10 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * Р”РѕР±Р°РІР»СЏРµС‚ Р·Р°РїРёСЃСЊ РІ РєРѕСЂР·РёРЅСѓ
+     * Добавляет запись в корзину
      *
-	 * @param PluginMinimarket_ModuleOrder_EntityOrderCart $oCart			РћР±СЉРµРєС‚ Р·Р°РїРёСЃРё
+	 * @param PluginMinimarket_ModuleOrder_EntityOrderCart $oCart    Объект записи
+	 *
      * @return int|null
      */
 	public function AddCartObject($oCart) {
@@ -179,9 +192,10 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє Р·Р°РїРёСЃРµР№ РёР· РєРѕСЂР·РёРЅС‹ РїРѕ ID Р·Р°РєР°Р·Р°
+     * Возвращает список записей из корзины по ID заказа
      *
-	 * @param int $iOrder			ID Р·Р°РєР°Р·Р°
+	 * @param int $iOrder    ID заказа
+	 *
      * @return array
      */
 	public function GetCartObjectsByOrder($iOrder) {
@@ -204,9 +218,10 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * РЈРґР°Р»СЏРµС‚ Р·Р°РїРёСЃСЊ РёР· РєРѕСЂР·РёРЅС‹
+     * Удаляет запись из корзины
      *
-	 * @param PluginMinimarket_ModuleOrder_EntityOrderCart $oCartObject			РћР±СЉРµРєС‚ Р·Р°РїРёСЃРё
+	 * @param PluginMinimarket_ModuleOrder_EntityOrderCart $oCartObject    Объект записи
+	 *
      * @return bool
      */
 	public function DeleteCartObject(PluginMinimarket_ModuleOrder_EntityOrderCart $oCartObject) {
@@ -218,13 +233,33 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * РџРѕР»СѓС‡Р°РµС‚ СЃРїРёСЃРѕРє Р·Р°РєР°Р·РѕРІ РїРѕ С„РёР»СЊС‚СЂСѓ
+     * Удаляет запись из корзины по ID заказа и ID товара
      *
-     * @param array $aFilter			Р¤РёР»СЊС‚СЂ РІС‹Р±РѕСЂРєРё
-     * @param array $aOrder				РЎРѕСЂС‚РёСЂРѕРІРєР°
-	 * @param int   $iCount				Р’РѕР·РІСЂР°С‰Р°РµС‚ РѕР±С‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РјРµРЅС‚РѕРІ
-     * @param int   $iCurrPage			РќРѕРјРµСЂ С‚РµРєСѓС‰РµР№ СЃС‚СЂР°РЅРёС†С‹
-     * @param int   $iPerPage			РљРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ РЅР° РѕРґРЅСѓ СЃС‚СЂР°РЅРёС†Сѓ
+	 * @param int $iOrderId      ID заказа
+	 * @param int $iProductId    ID продукта
+	 *
+     * @return bool
+     */
+	public function DeleteCartObjectByOrderIdAndProductId($iOrderId, $iProductId) {
+        $sql = "DELETE FROM " . Config::Get('db.table.minimarket_cart') . "
+			WHERE
+				`order_id` = ?d AND `product_id` = ?d
+		";
+        return $this->oDb->query(
+			$sql, 
+			$iOrderId, 
+			$iProductId
+		) !== false;		
+	}
+	
+    /**
+     * Получает список заказов по фильтру
+     *
+     * @param array $aFilter      Фильтр выборки
+     * @param array $aOrder       Сортировка
+	 * @param int   $iCount       Возвращает общее количество элментов
+     * @param int   $iCurrPage    Номер текущей страницы
+     * @param int   $iPerPage     Количество элементов на одну страницу
      *
      * @return array
      */
@@ -270,9 +305,9 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє Р·Р°РєР°Р·РѕРІ РїРѕ ID
+     * Возвращает список заказов по ID
      *
-     * @param array $aOrderId    РЎРїРёСЃРѕРє ID РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ
+     * @param array $aOrderId    Список ID комментариев
      *
      * @return array
      */
@@ -298,9 +333,9 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
     }
 	
     /**
-     * РЈРґР°Р»СЏРµС‚ РІСЃРµ Р·Р°РїРёСЃРё РёР· РєРѕСЂР·РёРЅС‹ РїРѕ ID Р·Р°РєР°Р·Р°
+     * Удаляет все записи из корзины по ID заказа
      *
-	 * @param int $iOrderId			ID Р·Р°РєР°Р·Р°
+	 * @param int $iOrderId			ID заказа
 	 *
      * @return bool
      */
@@ -313,9 +348,9 @@ class PluginMinimarket_ModuleOrder_MapperOrder extends Mapper {
 	}
 	
     /**
-     * РЈРґР°Р»СЏРµС‚ Р·Р°РєР°Р· РїРѕ ID
+     * Удаляет заказ по ID
      *
-	 * @param int $iOrderId			ID Р·Р°РєР°Р·Р°
+	 * @param int $iOrderId    ID заказа
 	 *
      * @return bool
      */

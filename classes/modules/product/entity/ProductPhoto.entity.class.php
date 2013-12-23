@@ -14,20 +14,20 @@ class PluginMinimarket_ModuleProduct_EntityProductPhoto extends Entity {
 	/**
 	 * Возвращает полный веб путь до фото определенного размера
 	 *
-	 * @param string|null $sWidth	Размер фото, например, '100' или '150crop'
+	 * @param string|null $sWidth    Размер фото. Например: '100', '150crop' и т.п.
+	 * 
 	 * @return null|string
 	 */
 	public function getProductPhotoWebPath($sWidth = null) {
-		if ($this->getProductPhotoPath()) {
+		if ($this->getPath()) {
 			if ($sWidth) {
-				$aPathInfo=pathinfo($this->getProductPhotoPath());
-				return $aPathInfo['dirname'].'/'.$aPathInfo['filename'].'_'.$sWidth.'.'.$aPathInfo['extension'];
+				$aPathInfo = pathinfo ($this->getPath());
+				return $aPathInfo['dirname'] . '/' . $aPathInfo['filename'] . '_' . $sWidth . '.' . $aPathInfo['extension'];
 			} else {
-				return $this->getProductPhotoPath();
+				return $this->getPath();
 			}
 		} else {
 			return null;
 		}
 	}
-
 }

@@ -26,11 +26,9 @@
 					<td>
 						<ul>
 							<li class="mb-10"><a class="catalog-product-href-title" href="{$oProduct->getWebPath()}">{$oProduct->getName()}{if $oProduct->getManufacturerCode()} ({$oProduct->getManufacturerCode()}){/if}</a></li>
-							{if $oProduct->getPrice()}
-								<li class="catalog-product-price mb-10">{number_format($oProduct->getPrice(),2,',',' ')}&nbsp;$<a class="catalog-product-buy-href" href="{cfg name='path.root.web'}cart/add/{$oProduct->getId()}/">{$aLang.plugin.minimarket.product_buy}</a></li>
-							{/if}
+							<li class="catalog-product-price mb-10">{$oProduct->getPriceCurrency()}<a class="catalog-product-buy-href" href="{cfg name='path.root.web'}cart/add/{$oProduct->getId()}/">{$aLang.plugin.minimarket.product_buy}</a></li>
 							{if count($oProduct->getProductCharacteristics())}
-								<li class="catalog-product-characteristics">{foreach from=$oProduct->getProductCharacteristics() item=oCharacteristics key=key_characteristics}{$oCharacteristics->getProductTaxonomyText()}{if count($oProduct->getProductCharacteristics())-1!=$key_characteristics}<span class="catalog-product-bull-characteristics">&bull;</span>{/if}{/foreach}</li>
+								<li class="catalog-product-characteristics">{foreach from=$oProduct->getProductCharacteristics() item=oCharacteristics key=key_characteristics}{$oCharacteristics->getText()}{if count($oProduct->getProductCharacteristics())-1!=$key_characteristics}<span class="catalog-product-bull-characteristics">&bull;</span>{/if}{/foreach}</li>
 							{/if}
 						</ul>
 					</td>

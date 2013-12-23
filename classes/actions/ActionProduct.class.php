@@ -15,13 +15,17 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 	
     public function Init() {
 		/**
-		 * Загружаем в шаблон JS текстовки
+		 * Загрузка в шаблон JS текстовки
 		 */
-		$this->Lang_AddLangJs(array(
-								  'topic_photoset_photo_delete','topic_photoset_mark_as_preview','topic_photoset_photo_delete_confirm',
-								  'plugin.minimarket.product_photoset_is_preview','topic_photoset_upload_choose'
-							  ));
-							  
+		$this->Lang_AddLangJs(
+			array(
+				'plugin.minimarket.product_photoset_photo_delete',
+				'plugin.minimarket.product_photoset_mark_as_preview',
+				'plugin.minimarket.product_photoset_photo_delete_confirm',
+				'plugin.minimarket.product_photoset_is_preview',
+				'plugin.minimarket.product_photoset_upload_choose',
+			)
+		);
         if ($this->User_IsAuthorization()) {
             $this->oUserCurrent = $this->User_GetUserCurrent();
         }
@@ -31,28 +35,26 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
     }
 	
 	/**
-	 * Регистрируем евенты
-	 *
+	 * Регистрация евентов
 	 */
 	protected function RegisterEvent() {
-		$this->AddEvent('add','EventProductadd');
-		$this->AddEvent('edit','EventProductedit');
-		$this->AddEvent('delete','EventProductdelete');
-		
-		// фото
-		$this->AddEvent('setimagedescription','EventSetPhotoDescription'); // Установка описания к фото
-		$this->AddEvent('deleteimage','EventDeletePhoto'); // Удаление изображения
-		$this->AddEvent('upload','EventUpload'); // Загрузка изображения
+		$this->AddEvent('add','EventProductAdd');
+		$this->AddEvent('edit','EventProductEdit');
+		$this->AddEvent('delete','EventProductDelete');
+
+		$this->AddEvent('setimagedescription','EventSetPhotoDescription'); // Установка описания к изображению
+		$this->AddEvent('deleteimage','EventDeletePhoto');                 // Удаление изображения
+		$this->AddEvent('upload','EventUpload');                           // Загрузка изображения
 	}
 	
 	/**
-	 * AJAX загрузка фоток
+	 * AJAX загрузка изображений
 	 *
 	 * @return unknown
 	 */
 	protected function EventUpload() {
 		/**
-		 * Устанавливаем формат Ajax ответа
+		 * Установка формата Ajax ответа
 		 * В зависимости от типа загрузчика устанавливается тип ответа
 		 */
 		if (getRequest('is_iframe')) {
@@ -61,7 +63,7 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 			$this->Viewer_SetResponseAjax('json');
 		}
 		/**
-		 * Проверяем авторизован ли юзер
+		 * Проверка, авторизован ли юзер
 		 */
         if ($this->User_IsAuthorization()) {
             $this->oUserCurrent = $this->User_GetUserCurrent();
@@ -76,62 +78,63 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 			$this->Message_AddError($this->Lang_Get('system_error'), $this->Lang_Get('error'));
 			return false;
 		}
-
 		$iProductId = getRequestStr('product_id');
 		$sTargetId = null;
 		$iCountPhotos = 0;
-		// Если от сервера не пришёл id топика, то пытаемся определить временный код для нового топика. Если и его нет, то это ошибка
+		/**
+		 * Попытка определить временный код для нового товара, если от сервера не пришел ID товара. Если не получилось, то это ошибка
+		 */
 		if (!$iProductId) {
 			$sTargetId = empty($_COOKIE['ls_photoset_target_tmp']) ? getRequestStr('ls_photoset_target_tmp') : $_COOKIE['ls_photoset_target_tmp'];
 			if (!$sTargetId) {
 				$this->Message_AddError($this->Lang_Get('system_error'), $this->Lang_Get('error'));
 				return false;
 			}
-			$iCountPhotos = $this->PluginMinimarket_Product_getCountPhotosByTargetTmp($sTargetId);
+			$iCountPhotos = $this->PluginMinimarket_Product_GetCountPhotosByTargetTmp($sTargetId);
 		} else {
 			/**
 			 * Загрузка фото к уже существующему товару
 			 */
-			$oProduct = $this->PluginMinimarket_Product_getProductById($iProductId);
+			$oProduct = $this->PluginMinimarket_Product_GetProductById($iProductId);
 			if (!$oProduct) {
 				$this->Message_AddError($this->Lang_Get('system_error'), $this->Lang_Get('error'));
 				return false;
 			}
-			$iCountPhotos = $this->PluginMinimarket_Product_getCountPhotosByProductId($iProductId);
+			$iCountPhotos = $this->PluginMinimarket_Product_GetCountPhotosByProductId($iProductId);
 		}
 		/**
-		 * Максимальное количество фото в топике
+		 * Максимальное количество изображений к товару
 		 */
-		if ($iCountPhotos >= Config::Get('module.topic.photoset.count_photos_max')) {
-			$this->Message_AddError($this->Lang_Get('topic_photoset_error_too_much_photos', array('MAX' => Config::Get('module.topic.photoset.count_photos_max'))), $this->Lang_Get('error'));
+		if ($iCountPhotos >= Config::Get('plugin.minimarket.product.photoset.count_photos_max')) {
+			$this->Message_AddError($this->Lang_Get('minimarket.product.product_photoset_error_too_much_photos', array('MAX' => Config::Get('plugin.minimarket.product.photoset.count_photos_max'))), $this->Lang_Get('error'));
 			return false;
 		}
 		/**
-		 * Максимальный размер фото
+		 * Максимальный размер изображения
 		 */
-		if (filesize($_FILES['Filedata']['tmp_name']) > Config::Get('module.topic.photoset.photo_max_size')*1024) {
-			$this->Message_AddError($this->Lang_Get('topic_photoset_error_bad_filesize', array('MAX' => Config::Get('module.topic.photoset.photo_max_size'))), $this->Lang_Get('error'));
+		if (filesize($_FILES['Filedata']['tmp_name']) > Config::Get('plugin.minimarket.product.photoset.photo_max_size') * 1024) {
+			$this->Message_AddError($this->Lang_Get('minimarket.product.product_photoset_error_bad_filesize', array('MAX' => Config::Get('plugin.minimarket.product.photoset.photo_max_size'))), $this->Lang_Get('error'));
 			return false;
 		}
 		/**
-		 * Загружаем файл
+		 * Загрузка файла
 		 */
 		$sFile = $this->PluginMinimarket_Product_UploadProductPhoto($_FILES['Filedata']);
 		if ($sFile) {
 			/**
-			 * Создаем фото
+			 * Создание изображения
 			 */
 			$oPhoto = Engine::GetEntity('PluginMinimarket_Product_ProductPhoto');
-			$oPhoto->setProductPhotoPath($sFile);
+			$oPhoto->setPath($sFile);
 			if ($iProductId) {
 				$oPhoto->setProductId($iProductId);
 			} else {
-				$oPhoto->setProductPhotoTargetTmp($sTargetId);
+				$oPhoto->setTargetTmp($sTargetId);
 			}
-			if ($oPhoto = $this->PluginMinimarket_Product_addProductPhoto($oPhoto)) {
+			if ($oPhoto = $this->PluginMinimarket_Product_AddProductPhoto($oPhoto)) {
 				$this->Viewer_AssignAjax('file', $oPhoto->getProductPhotoWebPath('100crop'));
-				$this->Viewer_AssignAjax('id', $oPhoto->getProductPhotoId());
-				$this->Message_AddNotice($this->Lang_Get('topic_photoset_photo_added'), $this->Lang_Get('attention'));
+				$this->Viewer_AssignAjax('id', $oPhoto->getId());
+				$this->Message_AddNotice($this->Lang_Get('plugin.minimarket.product_photoset_photo_added'), $this->Lang_Get('attention'));
 			} else {
 				$this->Message_AddError($this->Lang_Get('system_error'), $this->Lang_Get('error'));
 			}
@@ -141,16 +144,16 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 	}
 	
 	/**
-	 * AJAX удаление фото
+	 * AJAX удаление изображения
 	 *
 	 */
 	protected function EventDeletePhoto() {
 		/**
-		 * Устанавливаем формат Ajax ответа
+		 * Установка формата Ajax ответа
 		 */
 		$this->Viewer_SetResponseAjax('json');
 		/**
-		 * Проверяем авторизован ли юзер
+		 * Проверка, авторизован ли юзер
 		 */
         if ($this->User_IsAuthorization()) {
             $this->oUserCurrent = $this->User_GetUserCurrent();
@@ -159,22 +162,18 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
             return Router::Action('error');
         }
 		/**
-		 * Поиск фото по id
+		 * Поиск изображения по ID
 		 */
-		$oPhoto = $this->PluginMinimarket_Product_getProductPhotoById(getRequestStr('id'));
+		$oPhoto = $this->PluginMinimarket_Product_GetProductPhotoById(getRequestStr('id'));
 		if ($oPhoto) {
 			if ($oPhoto->getProductId()) {
-				/**
-				 * Проверяем права на топик
-				 */
-				if ($oProduct = $this->PluginMinimarket_Product_getProductById($oPhoto->getProductId())) {
-
-                    $this->PluginMinimarket_Product_deleteProductPhoto($oPhoto);
+				if ($oProduct = $this->PluginMinimarket_Product_GetProductById($oPhoto->getProductId())) {
+                    $this->PluginMinimarket_Product_DeleteProductPhoto($oPhoto);
                     /**
-                     * Если удаляем главную фотку продукта, то её необходимо сменить
+                     * Если происходит удаление главного изображения товара, то его необходимо сменить
                      */
-                    if ($oPhoto->getProductPhotoId() == $oProduct->getMainPhotoId()) {
-                        $aPhotos = $this->PluginMinimarket_Product_getPhotosByProductId($oProduct->getId());
+                    if ($oPhoto->getId() == $oProduct->getMainPhotoId()) {
+                        $aPhotos = $this->PluginMinimarket_Product_GetPhotosByProductId($oProduct->getId());
                         if(isset($aPhotos[0])) {
 							$oProduct->setMainPhotoId($aPhotos[0]->getId());
 						} else {
@@ -182,13 +181,13 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 						}
                     }
                     $this->PluginMinimarket_Product_UpdateProduct($oProduct);
-                    $this->Message_AddNotice($this->Lang_Get('topic_photoset_photo_deleted'), $this->Lang_Get('attention'));
+                    $this->Message_AddNotice($this->Lang_Get('plugin.minimarket.product_photoset_photo_deleted'), $this->Lang_Get('attention'));
 					
 					return;
 				}
 			} else {
-				$this->PluginMinimarket_Product_deleteProductPhoto($oPhoto);
-				$this->Message_AddNotice($this->Lang_Get('topic_photoset_photo_deleted'), $this->Lang_Get('attention'));
+				$this->PluginMinimarket_Product_DeleteProductPhoto($oPhoto);
+				$this->Message_AddNotice($this->Lang_Get('plugin.minimarket.product_photoset_photo_deleted'), $this->Lang_Get('attention'));
 				return;
 			}
 		}
@@ -197,11 +196,11 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 	
 	protected function EventSetPhotoDescription() {
 		/**
-		 * Устанавливаем формат Ajax ответа
+		 * Установка формата Ajax ответа
 		 */
 		$this->Viewer_SetResponseAjax('json');
 		/**
-		 * Проверяем авторизован ли юзер
+		 * Проверка, авторизован ли юзер
 		 */
         if ($this->User_IsAuthorization()) {
             $this->oUserCurrent = $this->User_GetUserCurrent();
@@ -210,132 +209,155 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
             return Router::Action('error');
         }
 		/**
-		 * Поиск фото по id
+		 * Поиск изображения по ID
 		 */
-		$oPhoto = $this->PluginMinimarket_Product_getProductPhotoById(getRequestStr('id'));
+		$oPhoto = $this->PluginMinimarket_Product_GetProductPhotoById(getRequestStr('id'));
 		if ($oPhoto) {
 			if ($oPhoto->getProductId()) {
-				// проверяем товар на существование
-				if ($oProduct = $this->PluginMinimarket_Product_getProductById($oPhoto->getProductId())) {
-					$oPhoto->setProductPhotoDescription(htmlspecialchars(strip_tags(getRequestStr('text'))));
-					$this->PluginMinimarket_Product_updateProductPhoto($oPhoto);
+				/**
+				 * Проверка товара на существование
+				 */
+				if ($oProduct = $this->PluginMinimarket_Product_GetProductById($oPhoto->getProductId())) {
+					$oPhoto->setDescription(htmlspecialchars(strip_tags(getRequestStr('text'))));
+					$this->PluginMinimarket_Product_UpdateProductPhoto($oPhoto);
 				}
 			} else {
-				$oPhoto->setProductPhotoDescription(htmlspecialchars(strip_tags(getRequestStr('text'))));
-				$this->PluginMinimarket_Product_updateProductPhoto($oPhoto);
+				$oPhoto->setDescription(htmlspecialchars(strip_tags(getRequestStr('text'))));
+				$this->PluginMinimarket_Product_UpdateProductPhoto($oPhoto);
 			}
 		}
 	}
 	
-	protected function EventProductdelete() {
+	protected function EventProductDelete() {
 		$this->Security_ValidateSendForm();
 		
         if (!$oProduct = $this->PluginMinimarket_Product_GetProductById($this->GetParam(0))) {
             return parent::EventNotFound();
         }
 		
-        $this->PluginMinimarket_Product_deleteProduct($oProduct);
+        $this->PluginMinimarket_Product_DeleteProduct($oProduct);
 		
         Router::Location('catalog/');
 	}
 	
-	protected function EventProductedit() {
+	protected function EventProductEdit() {
 		$sProductURL=$this->GetParam(0);
-		if (!($oProduct=$this->PluginMinimarket_Product_getProductByURL($sProductURL))) {
+		if (!($oProduct=$this->PluginMinimarket_Product_GetProductByURL($sProductURL))) {
 			return parent::EventNotFound();
 		}
 		
-		$this->Viewer_AddHtmlTitle($this->Lang_Get('plugin.minimarket.product_edit'));
-		$this->Viewer_Assign('aBrands', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('brand'));
-		$this->Viewer_Assign('aCategories', $this->PluginMinimarket_Taxonomy_GetTreeCategories());
-		$this->Viewer_Assign('aAttributes', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('attribut'));
-		$this->Viewer_Assign('aProperties', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('property'));
-		$this->Viewer_Assign('aAttributesCategories', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('attributes_category'));
-
+		$this->Viewer_AddHtmlTitle($this->Lang_Get('plugin.minimarket.product_product_editing'));
+		$this->Viewer_Assign('aBrands', $this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('brand'));
+		$this->Viewer_Assign('aCategories', $this->PluginMinimarket_Taxonomy_GetTreeTaxonomiesByType('category'));
+		$this->Viewer_Assign('aAttributes', $this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('attribut'));
+		$this->Viewer_Assign('aProperties', $this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('property'));
+		$this->Viewer_Assign('aAttributesCategories', $this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('attributes_category'));
+        /**
+         * Получение всего списка валют
+         */
+		$this->Viewer_Assign('aCurrency', $this->PluginMinimarket_Currency_GetAllCurrency());
+        /**
+         * Получение валюты "по умолчанию" из настроек магазина
+         */
+		$this->Viewer_Assign('oCurrencyDefault', $this->PluginMinimarket_Currency_GetCurrencyBySettings('default'));
+        /*
+         * Получение списка связей между атрибутами и заголовками атрибутов
+         */
+		$this->Viewer_Assign('aAttributesCategoryAttribut', $this->PluginMinimarket_Link_GetLinksByType('attributes_category_attribut'));
 		$this->SetTemplateAction('add');
 		
 		/**
-		 * Проверяем отправлена ли форма с данными(хотяб одна кнопка)
+		 * Проверка, отправлена ли форма
 		 */
 		if (isset($_REQUEST['submit_product_publish'])) {
 			/**
-			 * Обрабатываем отправку формы
+			 * Обработка отправки формы
 			 */
 			return $this->SubmitEdit($oProduct);
 		} else {
 			/**
-			 * Заполняем поля формы для редактирования
-			 * 
+			 * Заполнение полей формы для редактирования
 			 */
 			$_REQUEST['product_id'] = $oProduct->getId();
 			$_REQUEST['product_name'] = $oProduct->getName();
 			$_REQUEST['product_manufacturer_code'] = $oProduct->getManufacturerCode();
 			$_REQUEST['product_url'] = $oProduct->getURL();
-			$_REQUEST['product_price'] = $oProduct->getPrice();
+			$_REQUEST['product_price'] = $oProduct->getPrice() / Config::Get('plugin.minimarket.settings.factor');
+			$_REQUEST['product_currency'] = $oProduct->getCurrency();
 			$_REQUEST['product_weight'] = $oProduct->getWeight();
 			$_REQUEST['product_show'] = $oProduct->getShow();
 			$_REQUEST['product_in_stock'] = $oProduct->getInStock();
 			$_REQUEST['product_brand'] = $oProduct->getBrand();
 			$_REQUEST['product_category'] = $oProduct->getCategory();
 			
-			$aPropertiesIdByProduct = $this->PluginMinimarket_Product_getArrayProductPropertyIdByArrayProductId($oProduct->getId());
-			if(isset($aPropertiesIdByProduct[$oProduct->getId()])) {
+			$aPropertiesIdByProduct = $this->PluginMinimarket_Link_GetLinksByParentsAndType($oProduct->getId(), 'product_property');
+			if (isset($aPropertiesIdByProduct[$oProduct->getId()])) {
 				$_REQUEST['product_properties'] = $aPropertiesIdByProduct[$oProduct->getId()];
 				
-				$aAttributesIdByPropertiesId = $this->PluginMinimarket_Taxonomy_GetArrayIdParentByArrayIdTaxonomy($aPropertiesIdByProduct[$oProduct->getId()]);
-				// получим одномерный массив, состоящий только из ID атрибутов
+				$aAttributesIdByPropertiesId = $this->PluginMinimarket_Taxonomy_GetIdParentsByIdTaxonomies($aPropertiesIdByProduct[$oProduct->getId()]);
+				/**
+				 * Составление списка ID атрибутов
+				 */
 				$aIdAttribut = array();
 				foreach($aAttributesIdByPropertiesId as $iIdAttribut) {
 					$aIdAttribut[] = $iIdAttribut[0];
 				}
 				$_REQUEST['product_attributes'] = $aIdAttribut;
 			}
-			
-			$aCharacteristics = $this->PluginMinimarket_Product_GetArrayProductTaxonomyByArrayProductIdAndType($oProduct->getId(), 'characteristics');
+			$aCharacteristics = $this->PluginMinimarket_Product_GetProductTaxonomiesByArrayProductIdAndType($oProduct->getId(), 'characteristics');
 			$aCharacteristics = $aCharacteristics[$oProduct->getId()];
 			$aCharacteristicsName=array();
 			foreach($aCharacteristics as $oProductTaxonomy) {
-				$aCharacteristicsName[] = $oProductTaxonomy->getProductTaxonomyText();
+				$aCharacteristicsName[] = $oProductTaxonomy->getText();
 			}
-			$_REQUEST['product_characteristics'] = join(', ',$aCharacteristicsName);
-			
-			$aFeatures = $this->PluginMinimarket_Product_GetArrayProductTaxonomyByArrayProductIdAndType($oProduct->getId(), 'features');
+			$_REQUEST['product_characteristics'] = join(', ', $aCharacteristicsName);
+			$aFeatures = $this->PluginMinimarket_Product_GetProductTaxonomiesByArrayProductIdAndType($oProduct->getId(), 'features');
 			$aFeatures = $aFeatures[$oProduct->getId()];
-			$aFeaturesName=array();
+			$aFeaturesName = array();
 			foreach($aFeatures as $oProductTaxonomy) {
-				$aFeaturesName[] = $oProductTaxonomy->getProductTaxonomyText();
+				$aFeaturesName[] = $oProductTaxonomy->getText();
 			}
 			$_REQUEST['product_features'] = join(', ',$aFeaturesName);
-
 			$_REQUEST['product_main_photo'] = $oProduct->getMainPhotoId();
 			$_REQUEST['product_text'] = $oProduct->getText();
         }
-		$this->Viewer_Assign('aPhotos', $this->PluginMinimarket_Product_getPhotosByProductId($oProduct->getId()));
+		$this->Viewer_Assign('aPhotos', $this->PluginMinimarket_Product_GetPhotosByProductId($oProduct->getId()));
 	}
 	
-	protected function EventProductadd() {
-		$this->Viewer_Assign('aCategories', $this->PluginMinimarket_Taxonomy_GetTreeCategories());
+	protected function EventProductAdd() {
+		$this->Viewer_Assign('aCategories', $this->PluginMinimarket_Taxonomy_GetTreeTaxonomiesByType('category'));
 		$this->Viewer_Assign('sMenuItemSelect', 'product');
-        $this->Viewer_Assign('aAttributes', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('attribut'));
-        $this->Viewer_Assign('aProperties', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('property'));
-        $this->Viewer_Assign('aBrands', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('brand'));
-		$this->Viewer_Assign('aAttributesCategories', $this->PluginMinimarket_Taxonomy_getTaxonomiesByType('attributes_category'));
+        $this->Viewer_Assign('aAttributes', $this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('attribut'));
+        $this->Viewer_Assign('aProperties', $this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('property'));
+        $this->Viewer_Assign('aBrands', $this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('brand'));
+		$this->Viewer_Assign('aAttributesCategories', $this->PluginMinimarket_Taxonomy_GetTaxonomiesByType('attributes_category'));
+        /**
+         * Получение всего списка валют
+         */
+		$this->Viewer_Assign('aCurrency', $this->PluginMinimarket_Currency_GetAllCurrency());
+        /**
+         * Получение валюты "по умолчанию" из настроек магазина
+         */
+		$this->Viewer_Assign('oCurrencyDefault', $this->PluginMinimarket_Currency_GetCurrencyBySettings('default'));
+        /*
+         * Получение списка связей между атрибутами и заголовками атрибутов
+         */
+		$this->Viewer_Assign('aAttributesCategoryAttribut', $this->PluginMinimarket_Link_GetLinksByType('attributes_category_attribut'));
 						
 		if (!is_numeric(getRequest('product_id'))) {
-			$_REQUEST['product_id']='';
+			$_REQUEST['product_id'] = '';
 		}
 		/**
-		 * Если нет временного ключа для нового товара, то генерируем. если есть, то загружаем фото по этому ключу
+		 * Генерация ключа, если нет временного для нового товара. Если есть, то происходит загрузка изображения по этому ключу
 		 */
 		if (empty($_COOKIE['ls_photoset_target_tmp'])) {
-			setcookie('ls_photoset_target_tmp',  func_generator(), time()+24*3600,Config::Get('sys.cookie.path'),Config::Get('sys.cookie.host'));
+			setcookie('ls_photoset_target_tmp', func_generator(), time() + 24 * 3600, Config::Get('sys.cookie.path'), Config::Get('sys.cookie.host'));
 		} else {
-			setcookie('ls_photoset_target_tmp', $_COOKIE['ls_photoset_target_tmp'], time()+24*3600,Config::Get('sys.cookie.path'),Config::Get('sys.cookie.host'));
-			$this->Viewer_Assign('aPhotos', $this->PluginMinimarket_Product_getPhotosByTargetTmp($_COOKIE['ls_photoset_target_tmp']));
+			setcookie('ls_photoset_target_tmp', $_COOKIE['ls_photoset_target_tmp'], time() + 24 * 3600, Config::Get('sys.cookie.path'), Config::Get('sys.cookie.host'));
+			$this->Viewer_Assign('aPhotos', $this->PluginMinimarket_Product_GetPhotosByTargetTmp($_COOKIE['ls_photoset_target_tmp']));
 		}
-		
 		/**
-		 * Обрабатываем отправку формы
+		 * Обработка отправки формы
 		 */
 		return $this->SubmitAdd();
 	}
@@ -344,38 +366,37 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 		$sProductURLOld = $oProduct->getURL();
 		$oProduct->_setValidateScenario('product');
 		/**
-		 * Заполняем поля для валидации
+		 * Заполнение полей для валидации
 		 */
 		$oProduct->setName(strip_tags(getRequestStr('product_name')));
 		$oProduct->setManufacturerCode(getRequestStr('product_manufacturer_code'));
 		$oProduct->setURL(getRequestStr('product_url'));
 		$oProduct->setPrice(getRequestStr('product_price'));
+		$oProduct->setCurrency(getRequestStr('product_currency'));
 		$oProduct->setWeight(getRequestStr('product_weight'));
 		$oProduct->setShow(getRequestStr('product_show'));
 		$oProduct->setInStock(getRequestStr('product_in_stock'));	
 		$oProduct->setBrand(getRequestStr('product_brand'));
 		$oProduct->setCategory(getRequestStr('product_category'));
-		
-		// получим идентификаторы атрибутов и свойств
-		$aIdAttributesAndProperties=getRequestPost('product_attribut_and_property');		
-		if(!is_array($aIdAttributesAndProperties)) $aIdAttributesAndProperties=array($aIdAttributesAndProperties);
-		$aIdAttributes=array();
-		$aIdProperties=array();
-		
-		foreach($aIdAttributesAndProperties as $iIdAttribut=>$aAttributes) {
-			if(is_array($aAttributes) && count($aAttributes > 0)) {
-				$aIdAttributes[]=(int)$iIdAttribut;
-				foreach($aAttributes as $iProperty) {
-					$aIdProperties[]=(int)$iProperty;
+		/**
+		 * Получение идентификаторов атрибутов и свойств
+		 */
+		$aIdAttributesAndProperties = getRequestPost('product_attribut_and_property');		
+		if (!is_array($aIdAttributesAndProperties)) $aIdAttributesAndProperties = array($aIdAttributesAndProperties);
+		$aIdAttributes = array();
+		$aIdProperties = array();
+		foreach($aIdAttributesAndProperties as $iIdAttribut => $aAttributes) {
+			if (is_array($aAttributes) && count($aAttributes > 0)) {
+				$aIdAttributes[] = (int)$iIdAttribut;
+				foreach ($aAttributes as $iProperty) {
+					$aIdProperties[] = (int)$iProperty;
 				}
 			}
 		}
-		
-		$_REQUEST['product_attributes']=$aIdAttributes;
-		$_REQUEST['product_properties']=$aIdProperties;
-		$_REQUEST['product_attribut_and_property']=array_merge($aIdAttributes,$aIdProperties);
+		$_REQUEST['product_attributes'] = $aIdAttributes;
+		$_REQUEST['product_properties'] = $aIdProperties;
+		$_REQUEST['product_attribut_and_property'] = array_merge($aIdAttributes, $aIdProperties);
 		$oProduct->setAttributAndProperty($_REQUEST['product_attribut_and_property']);
-		
 		$oProduct->setProperties($aIdProperties);
 		$oProduct->setCharacteristics(getRequestStr('product_characteristics'));
 		$oProduct->setFeatures(getRequestStr('product_features'));
@@ -387,34 +408,38 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 			return false;
 		}
 		/**
-		 * Если уже существует продукт с таким URL
+		 * Умножение цены на коэффициент для более удобного хранения в БД
 		 */
-		if (($oProductByURL=$this->PluginMinimarket_Product_getProductByURL(getRequestStr('product_url'))) && $oProductByURL->getURL()!=$sProductURLOld) {
-			$this->Message_AddErrorSingle($this->Lang_Get('plugin.minimarket.product_create_url_double_error'),$this->Lang_Get('error'));
+		$oProduct->setPrice(getRequestStr('product_price') ? getRequestStr('product_price') * Config::Get('plugin.minimarket.settings.factor'): 0);
+		/**
+		 * Если уже существует товар с таким URL
+		 */
+		if (($oProductByURL = $this->PluginMinimarket_Product_GetProductByURL(getRequestStr('product_url'))) && $oProductByURL->getURL() != $sProductURLOld) {
+			$this->Message_AddErrorSingle($this->Lang_Get('plugin.minimarket.product_adding_url_double_error'), $this->Lang_Get('error'));
 			return false;
 		}
 		/*
-		 * Если есть прикрепленные фото
+		 * Если есть прикрепленные изображения
 		 */
-		if($aPhotos = $this->PluginMinimarket_Product_getPhotosByProductId($oProduct->getId())) {
-			if (!($oPhotoMain=$this->PluginMinimarket_Product_getProductPhotoById(getRequestStr('product_main_photo')) and $oPhotoMain->getProductId() == $oProduct->getId())) {
-				$oPhotoMain=$aPhotos[0];
+		if ($aPhotos = $this->PluginMinimarket_Product_GetPhotosByProductId($oProduct->getId())) {
+			if (!($oPhotoMain = $this->PluginMinimarket_Product_GetProductPhotoById(getRequestStr('product_main_photo')) and $oPhotoMain->getProductId() == $oProduct->getId())) {
+				$oPhotoMain = $aPhotos[0];
 			}
-			$oProduct->setMainPhotoId($oPhotoMain->getProductPhotoId());
+			$oProduct->setMainPhotoId($oPhotoMain->getId());
 		}
 		/**
-		 * Обновляем товар
+		 * Обновление товара
 		 */
 		if ($this->PluginMinimarket_Product_UpdateProduct($oProduct)) {
 			if (isset($aPhotos) && count($aPhotos)) {
-				foreach($aPhotos as $oPhoto) {
-					$oPhoto->setTargetTmp('clear');
-					$oPhoto->setTopicId(null);
-					$this->Topic_updateTopicPhoto($oPhoto);
+				foreach ($aPhotos as $oPhoto) {
+					$oPhoto->setTargetTmp(null);
+					$oPhoto->setProductId($oProduct->getId());
+					$this->PluginMinimarket_Product_UpdateProductPhoto($oPhoto);
 				}
 			}
 			/**
-			 * Удаляем временную куку
+			 * Удаление временной куки
 			 */
 			setcookie('ls_photoset_target_tmp', null);
 			Router::Location($oProduct->getWebPathBuilder());
@@ -426,45 +451,44 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 	
 	protected function SubmitAdd() {
 		/**
-		 * Проверяем отправлена ли форма с данными
+		 * Проверка, отправлена ли форма с данными
 		 */
 		if (!isPost('submit_product_publish')) {
 			return false;
 		}
-				
-		$oProduct=Engine::GetEntity('PluginMinimarket_ModuleProduct_EntityProduct');
+		$oProduct = Engine::GetEntity('PluginMinimarket_ModuleProduct_EntityProduct');
 		$oProduct->_setValidateScenario('product');
 		/**
-		 * Заполняем поля для валидации
+		 * Заполнение поля для валидации
 		 */
 		$oProduct->setName(strip_tags(getRequestStr('product_name')));
 		$oProduct->setManufacturerCode(getRequestStr('product_manufacturer_code'));
 		$oProduct->setURL(getRequestStr('product_url'));
 		$oProduct->setPrice(getRequestStr('product_price'));
+		$oProduct->setCurrency(getRequestStr('product_currency'));
 		$oProduct->setWeight(getRequestStr('product_weight'));
 		$oProduct->setShow(getRequestStr('product_show'));
 		$oProduct->setInStock(getRequestStr('product_in_stock'));
 		$oProduct->setBrand(getRequestStr('product_brand'));
 		$oProduct->setCategory(getRequestStr('product_category'));
-		
-		// получим идентификаторы атрибутов и свойств
-		$aIdAttributesAndProperties=getRequestPost('product_attribut_and_property');		
-		if(!is_array($aIdAttributesAndProperties)) $aIdAttributesAndProperties=array($aIdAttributesAndProperties);
-		$aIdAttributes=array();
-		$aIdProperties=array();
-		foreach($aIdAttributesAndProperties as $iIdAttribut=>$aAttributes) {
-			if($aAttributes) {
-				$aIdAttributes[]=(int)$iIdAttribut;
-				foreach($aAttributes as $iProperty) {
-					$aIdProperties[]=(int)$iProperty;
+		/**
+		 * Получение идентификаторов атрибутов и свойств
+		 */
+		$aIdAttributesAndProperties = getRequestPost('product_attribut_and_property');
+		if (!is_array($aIdAttributesAndProperties)) $aIdAttributesAndProperties = array($aIdAttributesAndProperties);
+		$aIdAttributes = array();
+		$aIdProperties = array();
+		foreach ($aIdAttributesAndProperties as $iIdAttribut=>$aAttributes) {
+			if ($aAttributes) {
+				$aIdAttributes[] = (int)$iIdAttribut;
+				foreach ($aAttributes as $iProperty) {
+					$aIdProperties[] = (int)$iProperty;
 				}
 			}
 		}
-		
-		$_REQUEST['product_attributes']=$aIdAttributes;
-		$_REQUEST['product_properties']=$aIdProperties;
-		$_REQUEST['product_attribut_and_property']=array_merge($aIdAttributes,$aIdProperties);
-		
+		$_REQUEST['product_attributes'] = $aIdAttributes;
+		$_REQUEST['product_properties'] = $aIdProperties;
+		$_REQUEST['product_attribut_and_property'] = array_merge($aIdAttributes,$aIdProperties);
 		$oProduct->setProperties($aIdProperties);
 		$oProduct->setCharacteristics(getRequestStr('product_characteristics'));
 		$oProduct->setFeatures(getRequestStr('product_features'));
@@ -476,42 +500,46 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 			return false;
 		}
 		/**
-		 * Если уже существует продукт с таким URL
+		 * Умножение цены на коэффициент для более удобного хранения в БД
 		 */
-		if (false!==($oProductByURL=$this->PluginMinimarket_Product_getProductByURL($oProduct->getURL()))) {
-			$this->Message_AddErrorSingle($this->Lang_Get('plugin.minimarket.product_create_url_double_error'),$this->Lang_Get('error'));
+		$oProduct->setPrice(getRequestStr('product_price') ? getRequestStr('product_price') * Config::Get('plugin.minimarket.settings.factor'): 0);
+		/**
+		 * Если уже существует товар с таким URL
+		 */
+		if (false !== ($oProductByURL = $this->PluginMinimarket_Product_GetProductByURL($oProduct->getURL()))) {
+			$this->Message_AddErrorSingle($this->Lang_Get('plugin.minimarket.product_adding_url_double_error'), $this->Lang_Get('error'));
 			return false;
 		}
 		/*
-		 * Если есть прикрепленные фото
+		 * Если есть прикрепленные изображения
 		 */
-		if($sTargetTmp = $_COOKIE['ls_photoset_target_tmp']){
-			if($aPhotos = $this->PluginMinimarket_Product_getPhotosByTargetTmp($sTargetTmp)){
-				if (!($oPhotoMain=$this->PluginMinimarket_Product_getProductPhotoById(getRequestStr('product_main_photo')) and $oPhotoMain->getProductPhotoTargetTmp()==$sTargetTmp)) {
-					$oPhotoMain=$aPhotos[0];
+		if ($sTargetTmp = $_COOKIE['ls_photoset_target_tmp']){
+			if ($aPhotos = $this->PluginMinimarket_Product_GetPhotosByTargetTmp($sTargetTmp)){
+				if (!($oPhotoMain = $this->PluginMinimarket_Product_GetProductPhotoById(getRequestStr('product_main_photo')) and $oPhotoMain->getTargetTmp() == $sTargetTmp)) {
+					$oPhotoMain = $aPhotos[0];
 				}
-				if($oPhotoMain){
-					$oProduct->setMainPhotoId($oPhotoMain->getProductPhotoId());
+				if ($oPhotoMain){
+					$oProduct->setMainPhotoId($oPhotoMain->getId());
 				}
 			}
 		}
 		/**
-		 * Добавляем товар
+		 * Добавление товара
 		 */
-		if ($this->PluginMinimarket_Product_addProduct($oProduct)) {
+		if ($this->PluginMinimarket_Product_AddProduct($oProduct)) {
 			/**
-			 * Привязываем фото к id товара
+			 * Привязка изображения к ID товара
 			 * здесь нужно это делать одним запросом, а не перебором сущностей
 			 */
 			if (isset($aPhotos) && count($aPhotos)) {
 				foreach($aPhotos as $oPhoto) {
-					$oPhoto->setProductPhotoTargetTmp(null);
+					$oPhoto->setTmp(null);
 					$oPhoto->setProductId($oProduct->getId());
-					$this->PluginMinimarket_Product_updateProductPhoto($oPhoto);
+					$this->PluginMinimarket_Product_UpdateProductPhoto($oPhoto);
 				}
 			}
 			/**
-			 * Удаляем временную куку
+			 * Удаление временной куки
 			 */
 			setcookie('ls_photoset_target_tmp', null);
 			Router::Location($oProduct->getWebPathBuilder());
@@ -520,7 +548,6 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 			return Router::Action('error');
 		}
 	}
-	
 	/**
 	 * Проверка полей формы
 	 *
@@ -528,16 +555,14 @@ class PluginMinimarket_ActionProduct extends ActionPlugin {
 	 */
 	protected function checkProductFields($oProduct) {
 		$this->Security_ValidateSendForm();
-
-		$bOk=true;
+		$bOk = true;
 		/**
-		 * Валидируем продукт
+		 * Валидация товара
 		 */
 		if (!$oProduct->_Validate()) {
-			$this->Message_AddError($oProduct->_getValidateError(),$this->Lang_Get('error'));
-			$bOk=false;
+			$this->Message_AddError($oProduct->_getValidateError(), $this->Lang_Get('error'));
+			$bOk = false;
 		}
-
 		return $bOk;
 	}
 }

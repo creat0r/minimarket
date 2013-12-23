@@ -11,19 +11,19 @@
 	</header>
 	<div class="product-img-container mb-30">
 		<div class="product-price">
-			<div class="mb-30"><span>{number_format($oProduct->getPrice(),2,',',' ')} $</span></div>
+			<div class="mb-30"><span>{$oProduct->getPriceCurrency()}</span></div>
 			<a class="product-buy-href" href="{cfg name='path.root.web'}cart/add/{$oProduct->getId()}/">{$aLang.plugin.minimarket.product_buy}</a>
 		</div>
 		{if count($aPhotos)}
 			<ul>
 				{foreach from=$aPhotos item=oPhoto}
-					<li onclick="ls.minimarket.imgUpdate('{$oPhoto->getProductPhotoId()}','{$oPhoto->getProductPhotoWebPath('375')}','{$oPhoto->getProductPhotoPath()}');">
-						<span id="product_img_preview_{$oPhoto->getProductPhotoId()}" class="{if $oProduct->getMainPhotoId()==$oPhoto->getProductPhotoId()}product-img-preview-active {/if}product-img-preview"><img src="{$oPhoto->getProductPhotoWebPath('36')}" alt="" /></span>
+					<li onclick="ls.minimarket.imgUpdate('{$oPhoto->getId()}','{$oPhoto->getProductPhotoWebPath('375')}','{$oPhoto->getPath()}');">
+						<span id="product_img_preview_{$oPhoto->getId()}" class="{if $oProduct->getMainPhotoId() == $oPhoto->getId()}product-img-preview-active {/if}product-img-preview"><img src="{$oPhoto->getProductPhotoWebPath('36')}" alt="" /></span>
 					</li>
 				{/foreach}
 			</ul>
 			<div class="product-img-main">
-				{foreach from=$aPhotos item=oPhoto}{if $oProduct->getMainPhotoId()==$oPhoto->getProductPhotoId()}<a id="product_img_main" href="{$oPhoto->getPath()}" target="_blank"><img src="{$oPhoto->getProductPhotoWebPath('375')}" alt="" /></a>{/if}{/foreach}
+				{foreach from=$aPhotos item=oPhoto}{if $oProduct->getMainPhotoId()==$oPhoto->getId()}<a id="product_img_main" href="{$oPhoto->getPath()}" target="_blank"><img src="{$oPhoto->getProductPhotoWebPath('375')}" alt="" /></a>{/if}{/foreach}
 			</div>
 		{else}
 			<div class="product-img-main-no-photo">
@@ -36,18 +36,18 @@
 	<div class="product-container mb-30">
 		<h2 class="product-text-title">{$aLang.plugin.minimarket.product_characteristics}</h2>
 		{assign var=var value=0}
-		{foreach from=$aCharacteristics item=oCharacteristics}{if $var}<span class="product-bull">&bull;</span>{/if}{$oCharacteristics->getProductTaxonomyText()}{assign var=var value=1}{/foreach}
+		{foreach from=$aCharacteristics item=oCharacteristics}{if $var}<span class="product-bull">&bull;</span>{/if}{$oCharacteristics->getText()}{assign var=var value=1}{/foreach}
 	</div>
 	{/if}
 	{if count($aFeatures)}
 	<div class="product-container{if $oProduct->getText()!='' || $aPropertiesByProduct} mb-30{/if}">
 		<h2 class="product-text-title">{$aLang.plugin.minimarket.product_features}</h2>
-		{assign var=var value=0}{foreach from=$aFeatures item=oFeatures}{if $var}<span class="product-bull">&bull;</span>{/if}{$oFeatures->getProductTaxonomyText()}{assign var=var value=1}{/foreach}
+		{assign var=var value=0}{foreach from=$aFeatures item=oFeatures}{if $var}<span class="product-bull">&bull;</span>{/if}{$oFeatures->getText()}{assign var=var value=1}{/foreach}
 	</div>
 	{/if}
 	{if $oProduct->getText()!=''}
 	<div class="product-container{if $aPropertiesByProduct} mb-30{/if}">
-		<h2 class="product-text-title">{$aLang.plugin.minimarket.product_description}</h2>
+		<h2 class="product-text-title">{$aLang.plugin.minimarket.description}</h2>
 		{$oProduct->getText()}
 	</div>
 	{/if}
@@ -58,16 +58,16 @@
 		{assign var=attributes_category value=0}
 		{foreach from=$aPropertiesByProduct item=oAttribut}
 			{assign var=var value=0}
-			{if $oAttribut->getTaxonomyType()=='attributes_category'}
+			{if $oAttribut->getType() == 'attributes_category'}
 				<tr>
 					<td colspan="2" class="{if $attributes_category==1}pt-15 {/if}attributes-category-additionally-title">{$oAttribut->getName()}</td>
 				</tr>
 				{assign var=attributes_category value=1}
 			{/if}
-			{if $oAttribut->getTaxonomyType()=='attribut'}
+			{if $oAttribut->getType() == 'attribut'}
 				<tr>
 					<td class="product-table-attribut-td"><div class="product-table-attribut-container"><span>{$oAttribut->getName()}</span></div></td>
-					<td>{foreach from=$aPropertiesByProduct item=oProperty}{if $oProperty->getParent()==$oAttribut->getId()}{if $var==1}, {/if}{assign var=var value=1}{$oProperty->getName()}{/if}{/foreach}</td>
+					<td>{foreach from=$aPropertiesByProduct item=oProperty}{if $oProperty->getParentId()==$oAttribut->getId()}{if $var==1}, {/if}{assign var=var value=1}{$oProperty->getName()}{/if}{/foreach}</td>
 				</tr>
 			{/if}
 		{/foreach}

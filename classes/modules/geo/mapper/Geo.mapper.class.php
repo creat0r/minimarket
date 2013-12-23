@@ -18,7 +18,7 @@ class PluginMinimarket_ModuleGeo_MapperGeo extends PluginMinimarket_Inherits_Mod
      */
     public function GetCountriesByConfig() {
 		$sWhere = '';
-		$aCounties = Config::Get('minimarket.settings.location.counties');
+		$aCounties = Config::Get('plugin.minimarket.settings.location.counties');
 		if(
 			$aCounties && 
 			is_array($aCounties) &&
@@ -50,14 +50,13 @@ class PluginMinimarket_ModuleGeo_MapperGeo extends PluginMinimarket_Inherits_Mod
     /**
      * Возвращает список регионов по списку стран
      *
-     * @param array $aCountries			Список ID стран
+     * @param array $aCountries    Список ID стран
      *
      * @return array
      */
     public function GetRegionsByCountries($aCountries) {
 		if(!is_array($aCountries)) $aCountries = array($aCountries);
-        $sql
-            = "SELECT
+        $sql = "SELECT
 					*
 				FROM
 					" . Config::Get('db.table.geo_region') . "
@@ -78,7 +77,7 @@ class PluginMinimarket_ModuleGeo_MapperGeo extends PluginMinimarket_Inherits_Mod
     /**
      * Возвращает список городов по списку регионов
      *
-     * @param array $aRegions			Список ID регионов
+     * @param array $aRegions    Список ID регионов
      *
      * @return array
      */

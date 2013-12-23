@@ -2,8 +2,8 @@ var ls = ls || {};
 
 ls.minimarket_photoset = (function ($) {
 
-	this.idLast=0;
-	this.isLoading=false;
+	this.idLast = 0;
+	this.isLoading = false;
 	this.swfu;
 	
 	this.initSwfUpload = function(opt) {
@@ -11,6 +11,9 @@ ls.minimarket_photoset = (function ($) {
 		opt.button_placeholder_id = 'photoset-start-upload';
 		opt.post_params.ls_photoset_target_tmp = $.cookie('ls_photoset_target_tmp') ? $.cookie('ls_photoset_target_tmp') : 0;
 		opt.upload_url = aRouter['mm_product'] + "upload";
+		opt.button_text = '<span class="button">'+ls.lang.get('plugin.minimarket.product_photoset_upload_choose')+'</span>';
+		opt.button_width = 140;
+		opt.button_text_left_padding = 0;
 		
 		$(ls.swfupload).unbind('load').bind('load',function() {
 			this.swfu = ls.swfupload.init(opt);
@@ -26,7 +29,7 @@ ls.minimarket_photoset = (function ($) {
 	
 	this.upload = function() {
 		ls.minimarket_photoset.addPhotoEmpty();
-		ls.ajaxSubmit(aRouter['mm_product']+'upload/',$('#photoset-upload-form'),function(data){
+		ls.ajaxSubmit(aRouter['mm_product'] + 'upload/', $('#photoset-upload-form'), function(data){
 			if (data.bStateError) {
 				$('#photoset_photo_empty').remove();
 				ls.msg.error(data.sMsgTitle,data.sMsg);
@@ -68,8 +71,8 @@ ls.minimarket_photoset = (function ($) {
 		if (!response.bStateError) {
 			template = '<li id="photo_'+response.id+'"><img src="'+response.file+'" alt="image" />'
 						+'<textarea onBlur="ls.minimarket_photoset.setPreviewDescription('+response.id+', this.value)"></textarea><br />'
-						+'<a href="javascript:ls.minimarket_photoset.deletePhoto('+response.id+')" class="image-delete">'+ls.lang.get('topic_photoset_photo_delete')+'</a>'
-						+'<span id="photo_preview_state_'+response.id+'" class="photo-preview-state"><a href="javascript:ls.minimarket_photoset.setPreview('+response.id+')" class="mark-as-preview">'+ls.lang.get('topic_photoset_mark_as_preview')+'</a></span></li>';
+						+'<a href="javascript:ls.minimarket_photoset.deletePhoto('+response.id+')" class="image-delete">'+ls.lang.get('plugin.minimarket.product_photoset_photo_delete')+'</a>'
+						+'<span id="photo_preview_state_'+response.id+'" class="photo-preview-state"><a href="javascript:ls.minimarket_photoset.setPreview('+response.id+')" class="mark-as-preview">'+ls.lang.get('plugin.minimarket.product_photoset_mark_as_preview')+'</a></span></li>';
 			$('#swfu_images').append(template);
 			ls.msg.notice(response.sMsgTitle,response.sMsg);
 		} else {
@@ -88,7 +91,7 @@ ls.minimarket_photoset = (function ($) {
 		$('.marked-as-preview').each(function (index, el) {
 			$(el).removeClass('marked-as-preview');
 			tmpId = $(el).attr('id').slice($(el).attr('id').lastIndexOf('_')+1);
-			$('#photo_preview_state_'+tmpId).html('<a href="javascript:ls.minimarket_photoset.setPreview('+tmpId+')" class="mark-as-preview">'+ls.lang.get('topic_photoset_mark_as_preview')+'</a>');
+			$('#photo_preview_state_'+tmpId).html('<a href="javascript:ls.minimarket_photoset.setPreview('+tmpId+')" class="mark-as-preview">'+ls.lang.get('plugin.minimarket.product_photoset_mark_as_preview')+'</a>');
 		});
 		$('#photo_'+id).addClass('marked-as-preview');
 		$('#photo_preview_state_'+id).html(ls.lang.get('plugin.minimarket.product_photoset_is_preview'));
@@ -106,7 +109,7 @@ ls.minimarket_photoset = (function ($) {
 	}
 	
 	this.deletePhoto = function(id) {
-		if (!confirm(ls.lang.get('topic_photoset_photo_delete_confirm'))) {return;}
+		if (!confirm(ls.lang.get('plugin.minimarket.product_photoset_photo_delete_confirm'))) {return;}
 		ls.ajax(aRouter['mm_product']+'deleteimage', {'id':id}, function(response){
 			if (!response.bStateError) {
 				$('#photo_'+id).remove();

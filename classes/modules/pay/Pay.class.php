@@ -32,7 +32,7 @@ class PluginMinimarket_ModulePay extends Module {
     /**
      * Получает объект системы оплаты по ID
      *
-	 * @param string $iId			ID системы оплаты
+	 * @param string $iId    ID системы оплаты
      *
      * @return PluginMinimarket_ModulePay_EntityPaySystem|bool
      */
@@ -43,7 +43,7 @@ class PluginMinimarket_ModulePay extends Module {
     /**
      * Возвращает список доступных систем оплаты по объекту заказа
      *
-	 * @param PluginMinimarket_ModulePay_EntityPaySystem $oOrder			Объект системы оплаты
+	 * @param PluginMinimarket_ModulePay_EntityPaySystem $oOrder    Объект системы оплаты
      *
      * @return array
      */
@@ -52,9 +52,9 @@ class PluginMinimarket_ModulePay extends Module {
 	}
 	
     /**
-     * Получает список объектов системы оплаты по списку ID
+     * Получает список объектов систем оплаты по списку ID систем оплаты
      *
-	 * @param string $aId			Список ID систем оплаты
+	 * @param string $aId    Список ID систем оплаты
      *
      * @return array
      */
@@ -66,7 +66,7 @@ class PluginMinimarket_ModulePay extends Module {
      * Добавление новой системы оплаты
      * Если запись с таким уникальным ключом уже существует, то обновляет ее
      *
-	 * @param PluginMinimarket_ModulePay_EntityPaySystem $oPaySystem			Объект системы оплаты
+	 * @param PluginMinimarket_ModulePay_EntityPaySystem $oPaySystem    Объект системы оплаты
      *
      * @return bool
      */
@@ -77,7 +77,8 @@ class PluginMinimarket_ModulePay extends Module {
     /**
      * Удаление системы оплаты
      *
-	 * @param $sKey			Ключ системы оплаты
+	 * @param string $sKey    Ключ системы оплаты
+	 * 
      * @return bool
      */
 	public function DeletePaySystemByKey($sKey) {

@@ -25,17 +25,17 @@
 			{if $aProperties}
 				{assign var=attributes_category value=0}
 				{foreach from=$aProperties item=oTaxonomy}
-					{if $oTaxonomy->getTaxonomyType()=='attributes_category'}
+					{if $oTaxonomy->getType() == 'attributes_category'}
 						<li class="block-filter-pros-attributes-category{if $attributes_category} pt-15{/if}">{$oTaxonomy->getName()}</li>
 						{assign var=attributes_category value=1}
 					{/if}
-					{if $oTaxonomy->getTaxonomyType()=='attribut'}
+					{if $oTaxonomy->getType() == 'attribut'}
 						<li>
 							<a class="block-filter-pros-attribut-href" id="block_filter_pros_attribut_href_{$oTaxonomy->getId()}" href="#">{$oTaxonomy->getName()}</a>
 							<div style="clear:both;"></div>
 							<ul {if in_array($oTaxonomy->getId(),$aIdAttributesActive)}style="display:block;"{/if}class="block-filter-pros-properties" id="block_filter_pros_features_{$oTaxonomy->getId()}">
 								{foreach from=$aProperties item=oProperty}
-									{if $oProperty->getParent()==$oTaxonomy->getId()}
+									{if $oProperty->getParentId()==$oTaxonomy->getId()}
 										<li>
 											<a class="block-filter-pros-properties-href{if in_array($oProperty->getId(),$aProsSortParams)} block-filter-pros-properties-href-active{/if}" 
 													href="

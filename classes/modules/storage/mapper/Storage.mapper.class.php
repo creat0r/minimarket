@@ -12,10 +12,11 @@
 class PluginMinimarket_ModuleStorage_MapperStorage extends Mapper {
 
     /**
-     * РЎРѕС…СЂР°РЅРµРЅРёРµ РґР°РЅРЅС‹С… РІ С…СЂР°РЅРёР»РёС‰Рµ
+     * Сохранение данных в хранилище
      *
-     * @param   array   $aData
-     * @return  bool
+     * @param array    $aData
+     *
+     * @return bool
      */
     public function UpdateStorage($aData) {
         $sql = "REPLACE INTO " . Config::Get('db.table.minimarket_storage') . "(?#) VALUES(?a)";
@@ -23,21 +24,22 @@ class PluginMinimarket_ModuleStorage_MapperStorage extends Mapper {
     }
 	
     /**
-     * Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР°РЅРЅС‹Рµ РёР· С…СЂР°РЅРёР»РёС‰Р°
+     * Возвращает данные из хранилища
      *
-     * @param	string			$sPrefix
-     * @return	array
+     * @param string|null    $sPrefix
+     *
+     * @return array
      */
     public function GetStorage($sPrefix = '') {
 
         if ($sPrefix) {
             $sql = "
-                SELECT storage_key, storage_val
+                SELECT `key`, `val`
                 FROM " . Config::Get('db.table.minimarket_storage') . "
-                WHERE storage_key LIKE '" . $sPrefix . "%'";
+                WHERE `key` LIKE '" . $sPrefix . "%'";
         } else {
             $sql = "
-                SELECT storage_key, storage_val
+                SELECT `key`, `val`
                 FROM " . Config::Get('db.table.minimarket_storage') . "
             ";
         }
@@ -45,7 +47,7 @@ class PluginMinimarket_ModuleStorage_MapperStorage extends Mapper {
         $aResult = array();
         if ($aRows)
             foreach ($aRows as $aRow) {
-                $aResult[$aRow['storage_key']] = $aRow['storage_val'];
+                $aResult[$aRow['key']] = $aRow['val'];
             }
         return $aResult;
     }

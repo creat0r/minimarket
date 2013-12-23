@@ -42,7 +42,7 @@ class PluginMinimarket_ActionMmajax extends ActionPlugin {
         $aProductTaxonomy = $this->PluginMinimarket_Product_GetProductTaxonomiesByLike($sValue,10,$this->GetParam(0));
 		
         foreach ($aProductTaxonomy as $oProductTaxonomy) {
-            $aItems[] = $oProductTaxonomy->getProductTaxonomyText();
+            $aItems[] = $oProductTaxonomy->getText();
         }
 		
         // * Передаем результат в ajax ответ

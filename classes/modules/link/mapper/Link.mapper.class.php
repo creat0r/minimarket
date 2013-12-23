@@ -24,7 +24,7 @@ class PluginMinimarket_ModuleLink_MapperLink extends Mapper {
 			object_type,
 			parent_id
 			)
-			VALUES(?d,?,?d)
+			VALUES(?d, ?, ?d)
 		";
         $nId = $this->oDb->query(
             $sql, $oLink->getObjectId(), $oLink->getObjectType(),  $oLink->getParentId()
@@ -38,7 +38,7 @@ class PluginMinimarket_ModuleLink_MapperLink extends Mapper {
     /**
      * Добавляет массив связей одним запросом
      *
-     * @param array $aObjectCity			Массив связей
+     * @param array $aObjectCity    Массив связей
      *
      * @return int|bool
      */
@@ -66,28 +66,28 @@ class PluginMinimarket_ModuleLink_MapperLink extends Mapper {
     /**
      * Удаляет связи по ID родителя и типу объекта
      *
-     * @param int $nParentId			ID родителя
-     * @param string $sObjectType		Тип объекта
+     * @param int    $iParentId      ID родителя
+     * @param string $sObjectType    Тип объекта
      *
      * @return bool
      */
-    public function DeleteLinkByParentAndType($nParentId, $sObjectType) {
+    public function DeleteLinkByParentAndType($iParentId, $sObjectType) {
         $sql = "DELETE FROM " . Config::Get('db.table.minimarket_link') . "
 			WHERE
 				parent_id = ?d AND object_type = ?
 		";
-        return $this->oDb->query($sql, $nParentId, $sObjectType) !== false;
+        return $this->oDb->query($sql, $iParentId, $sObjectType) !== false;
     }
 	
     /**
      * Возвращает список связей по ID родителя и типу объекта
      *
-     * @param int $nParentId			ID родителя
-     * @param string $sObjectType		Тип объекта
+     * @param int    $iParentId      ID родителя
+     * @param string $sObjectType    Тип объекта
      *
      * @return array
      */
-    public function GetLinksByParentAndType($nParentId, $sObjectType) {
+    public function GetLinksByParentAndType($iParentId, $sObjectType) {
 		$sql = "
 		SELECT
 			object_id
@@ -97,7 +97,7 @@ class PluginMinimarket_ModuleLink_MapperLink extends Mapper {
 			parent_id = ?d AND object_type = ? ";
 
 		$aLinks = array();
-		if($aRows = $this->oDb->select($sql, $nParentId, $sObjectType)) {
+		if($aRows = $this->oDb->select($sql, $iParentId, $sObjectType)) {
 			foreach ($aRows as $aRow) {
 				$aLinks[] = $aRow['object_id'];
 			}
@@ -106,14 +106,69 @@ class PluginMinimarket_ModuleLink_MapperLink extends Mapper {
     }
 	
     /**
-     * Возвращает списком количество повторений связей по ID родителя и типу объекта
+     * Возвращает список ID связей по списку ID родителей и типу объекта
      *
-     * @param int $nParentId			ID родителя
-     * @param string $sObjectType		Тип объекта
+     * @param int    $aParentId      ID родителя
+     * @param string $sObjectType    Тип объекта
      *
      * @return array
      */
-    public function GetCountLinksByParentAndType($nParentId, $sObjectType) {
+    public function GetLinksByParentsAndType($aParentId, $sObjectType) {
+		if (!is_array($aParentId)) $aParentId = array($aParentId);
+		if (!count($aParentId)) return array();
+		$sql = "
+		SELECT
+			object_id, parent_id
+		FROM
+			" . Config::Get('db.table.minimarket_link') . "
+		WHERE
+			parent_id IN(?a) AND object_type = ? ";
+
+		$aLinks = array();
+		if($aRows = $this->oDb->select($sql, $aParentId, $sObjectType)) {
+			foreach ($aRows as $aRow) {
+				$aLinks[$aRow['parent_id']][] = $aRow['object_id'];
+			}
+		}
+		return $aLinks ? $aLinks : array();
+    }
+
+    /**
+     * Возвращает список связей по типу объекта
+     *
+     * @param string $sObjectType    Тип объекта
+     *
+     * @return array
+     */
+    public function GetLinksByType($sObjectType) {
+		$sql = "SELECT
+					parent_id, object_id
+				FROM
+					" . Config::Get('db.table.minimarket_link') . "
+				WHERE
+					object_type = ? ";
+		$aLinks = array();
+		if ($aRows = $this->oDb->select(
+				$sql,
+				$sObjectType
+			)
+		) {
+			foreach ($aRows as $aRow) {
+				$aLinks[$aRow['parent_id']][] = $aRow['object_id'];
+			}
+		}
+		return $aLinks ? $aLinks : array();
+    }
+	
+    /**
+     * Возвращает списком количество повторений связей по ID родителя и типу объекта
+     *
+     * @param int $iParentId         ID родителя
+     * @param string $sObjectType    Тип объекта
+     *
+     * @return array
+     */
+    public function GetCountLinksByParentAndType($iParentId, $sObjectType) {
 		$sql = "
 		SELECT
 			object_id, COUNT(*) AS cnt
@@ -126,7 +181,7 @@ class PluginMinimarket_ModuleLink_MapperLink extends Mapper {
 		";
 
 		$aLinks = array();
-		if($aRows = $this->oDb->select($sql, $nParentId, $sObjectType)) {
+		if($aRows = $this->oDb->select($sql, $iParentId, $sObjectType)) {
 			foreach ($aRows as $aRow) {
 				$aLinks[$aRow['object_id']] = $aRow['cnt'];
 			}

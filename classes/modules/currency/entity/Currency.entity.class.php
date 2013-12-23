@@ -9,7 +9,6 @@
 ---------------------------------------------------------
 */
 
-class PluginMinimarket_ModuleDelivery_EntityDelivery extends Entity {
-	
-}
-?>
+class PluginMinimarket_ModuleCurrency_EntityCurrency extends Entity {}
+
+// EOF

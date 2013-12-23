@@ -23,8 +23,9 @@ class PluginMinimarket_ModuleStorage extends Module {
     /**
      * Сохранение данных в хранилище
      *
-     * @param	array			$aData
-     * @return	bool
+     * @param array    $aData
+     *
+     * @return bool
      */
 	public function UpdateStorage($aData) {
 		return $this->oMapper->UpdateStorage($aData);
@@ -33,8 +34,9 @@ class PluginMinimarket_ModuleStorage extends Module {
     /**
      * Возвращает данные из хранилища
      *
-     * @param	string			$sPrefix
-     * @return	array
+     * @param string    $sPrefix
+     *
+     * @return array
      */
     public function GetStorage($sPrefix = null) {
 		return $this->oMapper->GetStorage($sPrefix);

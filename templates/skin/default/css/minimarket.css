@@ -100,10 +100,28 @@
 .order-delivery-price{font-size:15px;font-weight:bold;}
 .order-delivery-label{margin:0;}
 .order-delivery-comment{margin-left:20px;font-size:11px;}
-.order-delivert-final{font-size:15px;text-align:right;padding-top:30px !important;}
-.order-delivert-final-cost{font-weight:bold;}
+.order-delivery-final{font-size:15px;text-align:right;padding-top:30px !important;}
+.order-delivery-final-cost{font-weight:bold;}
 
 .order-pay-systems{margin-bottom:30px;}
+
+.product-photo-upload { background: #F1F7FD; padding: 15px 15px 15px; margin-bottom: 20px; }
+.product-photo-upload h2 { margin-bottom: 15px; }
+.product-photo-upload ul { overflow: hidden; zoom: 1; }
+.product-photo-upload ul li { min-height: 100px; _height: 100px; margin-bottom: 10px; padding-left: 110px; position: relative; }
+.product-photo-upload ul li img { position: absolute; top: 0; left: 0; }
+.product-photo-upload ul li label { color: #aaa; }
+.product-photo-upload ul li textarea { border: 1px solid #ddd; width: 350px; height: 60px; padding: 3px; font-size: 12px; font-family: Arial, sans-serif; color: #333; }
+.product-photo-upload ul li .image-delete { text-decoration: none; margin-right: 15px; }
+.product-photo-upload ul li .image-delete:hover { color: #f00; }
+.product-photo-upload ul li.marked-as-preview .mark-as-preview { display: inline; color: #43c70f; font-weight: bold; }
+.product-photo-upload ul li .mark-as-preview { display: none; text-decoration: none; }
+.product-photo-upload ul li:hover .mark-as-preview { display: inline; }
+.product-photo-upload .product-photo-upload-rules { color: #888; margin-bottom: 15px; }
+.product-photo-upload .product-photo-upload-input { margin-bottom: 20px; }
+.product-photo-upload .product-photo-upload-input input { margin-top: 3px; }
+
+.payment-title{font-size:22px;}
 
 .mb-5{margin-bottom:5px;}
 .pt-15{padding-top:15px;}
@@ -117,3 +135,4 @@
 .mr-30{margin-right:30px;}
 .float-right{float:right;}
 .float-left{float:left;}
+.mb-30{margin-bottom:30px;}

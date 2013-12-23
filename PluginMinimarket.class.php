@@ -24,7 +24,6 @@ class PluginMinimarket extends Plugin {
 		$this->Viewer_AppendScript(Plugin::GetTemplatePath(__CLASS__).'js/minimarket.js');
 		$this->Viewer_AppendScript(Plugin::GetTemplatePath(__CLASS__).'js/minimarket_photoset.js');
 		$this->Viewer_AppendScript(Plugin::GetTemplatePath(__CLASS__).'js/chosen.jquery.min.js');
-		$this->Viewer_AppendScript(Plugin::GetTemplatePath(__CLASS__).'js/jquery.liTranslit.js');
 		
 		$this->Viewer_AppendStyle(Plugin::GetTemplatePath(__CLASS__).'css/minimarket.css');
 		$this->Viewer_AppendStyle(Plugin::GetTemplatePath(__CLASS__).'css/chosen.min.css');
@@ -48,6 +47,7 @@ class PluginMinimarket extends Plugin {
     protected $aDelegates = array(
         'template' => array(
             'menu.catalog.tpl' => '_menu.catalog.tpl',
+            'payment_init_order.tpl' => '_payment_init_order.tpl',
         ),
     );
 }

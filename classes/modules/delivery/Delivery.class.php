@@ -11,29 +11,35 @@
 
 class PluginMinimarket_ModuleDelivery extends Module {
 
+	/**
+	 * Типы расчета стоимости заказа
+	 */
+	const DELIVERY_COST_CALCULATION_ENTIRE_ORDER = 1;
+	const DELIVERY_COST_CALCULATION_ONE_ITEM     = 2;
+
 	protected $oMapper;
 	
 	/**
 	 * Инициализация модуля
 	 */
 	public function Init() {
-		$this->oMapper=Engine::GetMapper(__CLASS__);
+		$this->oMapper = Engine::GetMapper(__CLASS__);
 	}
 	
     /**
      * Обновление службы доставки
      *
-     * @param PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService			Объект службы доставки
+     * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Объект службы доставки
      *
      * @return bool
      */
-	public function UpdateDeliveryService(PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService) {
+	public function UpdateDeliveryService(PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService) {
 		if($this->oMapper->UpdateDeliveryService($oDeliveryService)) {
 			/**
 			 * Удаляем старые связи с группами местоположений и системами оплаты
 			 */
-			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(),'delivery_service_location_group');
-			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(),'delivery_service_pay_system');
+			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(), 'delivery_service_location_group');
+			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(), 'delivery_service_pay_system');
 			/**
 			 * Создаем новые связи между службой доставки и группами местоположений
 			 */
@@ -71,18 +77,18 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Создание службы доставки
      *
-     * @param PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService			Объект службы доставки
+     * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Объект службы доставки
      *
      * @return int|bool
      */
-	public function AddDeliveryService(PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService) {
-		if($iId = $this->oMapper->AddDeliveryService($oDeliveryService)) {
+	public function AddDeliveryService(PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService) {
+		if ($iId = $this->oMapper->AddDeliveryService($oDeliveryService)) {
 			/**
 			 * Создадим связи между службой доставки и группами местоположений
 			 */
 			$aObjectLocationGroup = array();
 			$aLocationGroupId = $oDeliveryService->getLocationGroups();
-			foreach($aLocationGroupId as $idLocationGroup) {
+			foreach ($aLocationGroupId as $idLocationGroup) {
 				$oLink = Engine::GetEntity('PluginMinimarket_ModuleLink_EntityLink');
 				$oLink->setObjectId($idLocationGroup);
 				$oLink->setParentId($iId);
@@ -94,7 +100,7 @@ class PluginMinimarket_ModuleDelivery extends Module {
 			 */
 			$aObjectPaySystem = array();
 			$aPaySystemId = $oDeliveryService->getPaySystems();
-			foreach($aPaySystemId as $idPaySystem) {
+			foreach ($aPaySystemId as $idPaySystem) {
 				$oLink = Engine::GetEntity('PluginMinimarket_ModuleLink_EntityLink');
 				$oLink->setObjectId($idPaySystem);
 				$oLink->setParentId($iId);
@@ -114,7 +120,7 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Возвращает список служб доставки по типу
      *
-	 * @param string $sType			Тип службы доставки
+	 * @param string $sType    Тип службы доставки
      *
      * @return array
      */
@@ -123,9 +129,20 @@ class PluginMinimarket_ModuleDelivery extends Module {
 	}
 	
     /**
+     * Возвращает количество служб доставки по валюте
+     *
+	 * @param string $iCurrency    ID валюты
+     *
+     * @return array
+     */
+	public function GetCountDeliveryServicesByCurrency($iCurrency) {
+		return $this->oMapper->GetCountDeliveryServicesByCurrency($iCurrency);
+	}
+	
+    /**
      * Возвращает список служб доставки по списку ID
      *
-	 * @param array $aDeliveryServiceId			Список ID служб доставки
+	 * @param array $aDeliveryServiceId    Список ID служб доставки
      *
      * @return array
      */
@@ -136,7 +153,7 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Возвращает список активированных служб доставки по ID города, для которых они актуальны (настраивается в админке)
      *
-	 * @param string $iCity			ID города
+	 * @param string $iCity    ID города
      *
      * @return array
      */
@@ -147,7 +164,7 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Удаляет службу доставки
 	 *
-	 * @param PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService			Объект службы доставки
+	 * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Объект службы доставки
      *
      * @return bool
      */
@@ -156,11 +173,11 @@ class PluginMinimarket_ModuleDelivery extends Module {
 			/**
 			 * Удаляем связи с группами местоположений
 			 */
-			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(),'delivery_service_location_group');
+			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(), 'delivery_service_location_group');
 			/**
 			 * Удаляем связи с системами оплаты
 			 */
-			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(),'delivery_service_pay_system');
+			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(), 'delivery_service_pay_system');
 			return true;
 		}
 		return false;
@@ -169,22 +186,23 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Удаляет службу доставки по ключу
 	 *
-	 * @param  $sKey			Ключ службы доставки
+	 * @param string $sKey    Ключ службы доставки
+	 *
      * @return bool
      */
 	public function DeleteDeliveryServiceByKey($sKey) {
-		if(
-			false!==($oDeliveryService = $this->GetDeliveryServiceByKey($sKey))
+		if (
+			false !== ($oDeliveryService = $this->GetDeliveryServiceByKey($sKey))
 			&& $this->oMapper->DeleteDeliveryServiceByKey($sKey)
 		) {
 			/**
 			 * Удаляем связи с группами местоположений
 			 */
-			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(),'delivery_service_location_group');
+			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(), 'delivery_service_location_group');
 			/**
 			 * Удаляем связи с системами оплаты
 			 */
-			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(),'delivery_service_pay_system');
+			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryService->getId(), 'delivery_service_pay_system');
 			return true;
 		}
 		return false;
@@ -193,9 +211,9 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Возвращает объект службы доставки
      *
-     * @param int $iId			ID службы доставки
+     * @param int $iId    ID службы доставки
      *
-     * @return PluginMinimarket_ModuleDelivery_EntityService|null
+     * @return PluginMinimarket_ModuleDelivery_EntityDeliveryService|null
      */
 	public function GetDeliveryServiceById($iId) {
 		return $this->oMapper->GetDeliveryServiceById($iId);
@@ -204,9 +222,9 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Возвращает объект службы доставки по ключу
      *
-     * @param int $sKey			Ключ службы доставки
+     * @param int $sKey    Ключ службы доставки
      *
-     * @return PluginMinimarket_ModuleDelivery_EntityService|null
+     * @return PluginMinimarket_ModuleDelivery_EntityDeliveryService|null
      */
 	public function GetDeliveryServiceByKey($sKey) {
 		return $this->oMapper->GetDeliveryServiceByKey($sKey);
@@ -215,7 +233,7 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Возвращает доступные службы доставки для конкретного заказа
      *
-     * @param PluginMinimarket_ModuleOrder_EntityOrder $oOrder			Объект заказа
+     * @param PluginMinimarket_ModuleOrder_EntityOrder $oOrder    Объект заказа
      *
      * @return array
      */
@@ -246,17 +264,35 @@ class PluginMinimarket_ModuleDelivery extends Module {
 		 * Получаем доступные автоматические службы доставки
 		 */
 		$aDeliveryServices = $this->GetAutomaticDeliveryServicesByOrderAndByProducts($oOrder, $aProducts, $aCartObjects, $aDeliveryServicesByCity, $aDeliveryServices);
+		$aCurrency = $this->PluginMinimarket_Currency_GetAllCurrency();
+		/**
+		 * Форматирование стоимости доставки относительно валюты корзины
+		 */
+		$oCurrency = $this->PluginMinimarket_Currency_GetCurrencyBySettings('cart');
+		if (is_array($aDeliveryServices)) {
+			foreach ($aDeliveryServices as $oDeliveryService) {
+				$nPriceByCurrency = $oDeliveryService->getCost() / (($oCurrency->getCourse() / $oCurrency->getNominal()) / ($aCurrency[$oDeliveryService->getCurrency()]->getCourse() / $aCurrency[$oDeliveryService->getCurrency()]->getNominal()));
+				$oDeliveryService->setCartCost($nPriceByCurrency);
+				$oDeliveryService->setCartCostCurrency(
+					$this->PluginMinimarket_Currency_GetSumByFormat(
+						$nPriceByCurrency / Config::Get('plugin.minimarket.settings.factor'),
+						$oCurrency->getDecimalPlaces(),
+						$oCurrency->getFormat()
+					)
+				);
+			}
+		}
 		return $aDeliveryServices;
 	}
 	
     /**
      * Возвращает список доступных автоматических служб доставки
      *
-     * @param PluginMinimarket_ModuleOrder_EntityOrder				$oOrder						Объект заказа
-     * @param array													$aProducts					Список товаров
-     * @param array													$aCartObjects				Список ID товаров + количество каждого товара
-     * @param array													$aDeliveryServicesByCity	Список всех служб доставки, доступных по ID города клиента
-     * @param array|null											$aDeliveryServices			Список доступных служб доставки
+     * @param PluginMinimarket_ModuleOrder_EntityOrder $oOrder                     Объект заказа
+     * @param array                                    $aProducts                  Список товаров
+     * @param array                                    $aCartObjects               Список ID товаров + количество каждого товара
+     * @param array                                    $aDeliveryServicesByCity    Список всех служб доставки, доступных по ID города клиента
+     * @param array|null                               $aDeliveryServices          Список доступных служб доставки
      *
      * @return array
      */	
@@ -271,7 +307,7 @@ class PluginMinimarket_ModuleDelivery extends Module {
 						 */
 						$oDeliveryServiceExternal = $this->GetDeliveryServiceExternalByOrderAndByProducts($oOrder, $aProducts, $aCartObjects, $oDeliveryServiceAutomatic);
 						if ($oDeliveryServiceExternal['bOK'] === true) {
-							$aDeliveryServices[] = $oDeliveryServiceExternal['oDeliveryService'];
+							$aDeliveryServices[$oDeliveryServiceExternal['oDeliveryService']->getId()] = $oDeliveryServiceExternal['oDeliveryService'];
 						}
 				}
 			}
@@ -282,30 +318,30 @@ class PluginMinimarket_ModuleDelivery extends Module {
     /**
      * Возвращает объект внешней службы доставки (реализованной другим плагином)
      *
-     * @param PluginMinimarket_ModuleOrder_EntityOrder				$oOrder						Объект заказа
-     * @param array													$aProducts					Список товаров
-     * @param array													$aCartObjects				Список ID товаров + количество каждого товара
-     * @param PluginMinimarket_ModuleDelivery_EntityService			$oDeliveryService			Объект службы доставки
+     * @param PluginMinimarket_ModuleOrder_EntityOrder              $oOrder              Объект заказа
+     * @param array                                                 $aProducts           Список товаров
+     * @param array                                                 $aCartObjects        Список ID товаров + количество каждого товара
+     * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Объект службы доставки
      *
-     * @return PluginMinimarket_ModuleDelivery_EntityService
+     * @return PluginMinimarket_ModuleDelivery_EntityDeliveryService
      */		
 	public function GetDeliveryServiceExternalByOrderAndByProducts($oOrder, $aProducts, $aCartObjects, $oDeliveryService) {
 		$bOK = false;
 		/**
 		 * Запускаем выполнение хуков
 		 */
-		$this->Hook_Run('minimarket_get_delivery_service_external', array('bOK'=>&$bOK,'oDeliveryService' => &$oDeliveryService));
-		return array('bOK' => $bOK,'oDeliveryService' => $oDeliveryService);
+		$this->Hook_Run('minimarket_get_delivery_service_external', array('bOK' => &$bOK, 'oDeliveryService' => &$oDeliveryService));
+		return array('bOK' => $bOK, 'oDeliveryService' => $oDeliveryService);
 	}
 
     /**
      * Возвращает список доступных настраиваемых служб доставки
      *
-     * @param PluginMinimarket_ModuleOrder_EntityOrder				$oOrder						Объект заказа
-     * @param array													$aProducts					Список товаров
-     * @param array													$aCartObjects				Список ID товаров + количество каждого товара
-     * @param array													$aDeliveryServicesByCity	Список всех служб доставки, доступных по ID города клиента
-     * @param array|null											$aDeliveryServices			Список доступных служб доставки
+     * @param PluginMinimarket_ModuleOrder_EntityOrder $oOrder                     Объект заказа
+     * @param array                                    $aProducts                  Список товаров
+     * @param array                                    $aCartObjects               Список ID товаров + количество каждого товара
+     * @param array                                    $aDeliveryServicesByCity    Список всех служб доставки, доступных по ID города клиента
+     * @param array|null                               $aDeliveryServices          Список доступных служб доставки
      *
      * @return array
      */	
@@ -313,52 +349,37 @@ class PluginMinimarket_ModuleDelivery extends Module {
 		if (!is_null($aDeliveryServices) && !is_array($aDeliveryServices)) $aDeliveryServices = array($aDeliveryServices);
 		foreach($aDeliveryServicesByCity as $oDeliveryServiceTunable) {
 			if ($oDeliveryServiceTunable->getType() == 'tunable') {
-				$oDeliveryService = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityService');
+				$oDeliveryService = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityDeliveryService');
 				$oDeliveryService->setId($oDeliveryServiceTunable->getId());
 				$oDeliveryService->setName($oDeliveryServiceTunable->getName());
 				$oDeliveryService->setTimeFrom($oDeliveryServiceTunable->getTimeFrom());
 				$oDeliveryService->setTimeTo($oDeliveryServiceTunable->getTimeTo());
 				$oDeliveryService->setDescription($oDeliveryServiceTunable->getDescription());
+				$oDeliveryService->setCurrency($oDeliveryServiceTunable->getCurrency());
 				/**
-				 * Расчитаем стоимость
-				 * 
-				 * Если стоимость -- это не процент от суммы
+				 * Расчет стоимости
 				 */
-				if (!substr_count($oDeliveryServiceTunable->getCost(), '%')) {
-					switch ($oDeliveryServiceTunable->getCostCalculation()) {
-						case 1:
-							/**
-							 * Если стоимость расчитывается за весь заказ
-							 */
-							$oDeliveryService->setCost($oDeliveryServiceTunable->getCost());
-							break;
-						case 2:
-							/**
-							 * Если стоимость расчитывается за каждый товар
-							 * Подсчитываем количество товаров
-							 */
-							$iCount = 0;
-							foreach ($aCartObjects as $iCountProducts) {
-								$iCount += $iCountProducts;
-							}
-							$oDeliveryService->setCost($oDeliveryServiceTunable->getCost() * $iCount);
-							break;
-						case 3:
-							/**
-							 * Если стоимость расчитывается относительно веса
-							 * Подсчитываем общий вес в кг.
-							 */
-							$fWeight = 0;
-							foreach ($aProducts as $oProduct) {
-								$fWeight += $oProduct->getWeight();
-							}
-							$oDeliveryService->setCost($oDeliveryServiceTunable->getCost() * $fWeight);
-							break;
-					}
-				} else {
-					$oDeliveryService->setCost(($oOrder->getCartSum() / 100) * (float)$oDeliveryServiceTunable->getCost());
+				switch ($oDeliveryServiceTunable->getCostCalculation()) {
+					case self::DELIVERY_COST_CALCULATION_ENTIRE_ORDER:
+						/**
+						 * Если стоимость расчитывается за весь заказ
+						 */
+						$oDeliveryService->setCost($oDeliveryServiceTunable->getCost());
+						break;
+					case self::DELIVERY_COST_CALCULATION_ONE_ITEM:
+						/**
+						 * Если стоимость расчитывается за каждый товар
+						 *
+						 * Подсчет количества товаров
+						 */
+						$iCount = 0;
+						foreach ($aCartObjects as $iCountProducts) {
+							$iCount += $iCountProducts;
+						}
+						$oDeliveryService->setCost($oDeliveryServiceTunable->getCost() * $iCount);
+						break;
 				}
-				$aDeliveryServices[] = $oDeliveryService;
+				$aDeliveryServices[$oDeliveryService->getId()] = $oDeliveryService;
 			}
 		}
 		return $aDeliveryServices;
@@ -368,28 +389,27 @@ class PluginMinimarket_ModuleDelivery extends Module {
      * Добавление новой службы доставки
      * Если запись с таким уникальным ключом уже существует, то обновляет ее
      *
-	 * @param PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService			Объект службы доставки
+	 * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Объект службы доставки
      *
      * @return bool
      */
-	public function AddOrUpdateDeliveryService(PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService) {
-		
+	public function AddOrUpdateDeliveryService(PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService) {
 		if(
 			$this->oMapper->AddOrUpdateDeliveryService($oDeliveryService)
-			&& false!==($oDeliveryServiceByKey = $this->GetDeliveryServiceByKey($oDeliveryService->getKey()))
+			&& false !== ($oDeliveryServiceByKey = $this->GetDeliveryServiceByKey($oDeliveryService->getKey()))
 		) {
 			/**
 			 * Удаляем старые связи с группами местоположений и системами оплаты
 			 */
-			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryServiceByKey->getId(),'delivery_service_location_group');
-			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryServiceByKey->getId(),'delivery_service_pay_system');
+			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryServiceByKey->getId(), 'delivery_service_location_group');
+			$this->PluginMinimarket_Link_DeleteLinkByParentAndType($oDeliveryServiceByKey->getId(), 'delivery_service_pay_system');
 			/**
 			 * Создаем новые связи между службой доставки и группами местоположений
 			 */
 			$aObjectLocationGroup = array();
 			$aLocationGroupId = $oDeliveryService->getLocationGroups();
-			if(!empty($aLocationGroupId)) {
-				foreach($aLocationGroupId as $idLocationGroup) {
+			if (!empty($aLocationGroupId)) {
+				foreach ($aLocationGroupId as $idLocationGroup) {
 					$oLink = Engine::GetEntity('PluginMinimarket_ModuleLink_EntityLink');
 					$oLink->setObjectId($idLocationGroup);
 					$oLink->setParentId($oDeliveryServiceByKey->getId());
@@ -402,8 +422,8 @@ class PluginMinimarket_ModuleDelivery extends Module {
 			 */
 			$aObjectPaySystem = array();
 			$aPaySystemId = $oDeliveryService->getPaySystems();
-			if(!empty($aPaySystemId)) {
-				foreach($aPaySystemId as $idPaySystem) {
+			if (!empty($aPaySystemId)) {
+				foreach ($aPaySystemId as $idPaySystem) {
 					$oLink = Engine::GetEntity('PluginMinimarket_ModuleLink_EntityLink');
 					$oLink->setObjectId($idPaySystem);
 					$oLink->setParentId($oDeliveryServiceByKey->getId());

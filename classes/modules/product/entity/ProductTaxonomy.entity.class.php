@@ -9,6 +9,4 @@
 ---------------------------------------------------------
 */
 
-class PluginMinimarket_ModuleProduct_EntityProductTaxonomy extends Entity {
-
-}
+class PluginMinimarket_ModuleProduct_EntityProductTaxonomy extends Entity {}

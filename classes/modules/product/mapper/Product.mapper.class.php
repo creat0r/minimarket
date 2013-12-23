@@ -11,146 +11,199 @@
 
 class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
 	
-    public function addProduct(PluginMinimarket_ModuleProduct_EntityProduct $oProduct) {
+    /**
+     * Добавление товара
+     *
+     * @param PluginMinimarket_ModuleProduct_EntityProduct $oProduct    Объект товара
+     *
+     * @return int|bool
+     */
+    public function AddProduct(PluginMinimarket_ModuleProduct_EntityProduct $oProduct) {
         $sql = "INSERT INTO " . Config::Get('db.table.minimarket_product') . "
-			(product_name,
-			product_manufacturer_code,
-			product_url,
-			product_brand,
-			product_category,
-			product_price,
-			product_weight,
-			product_show,
-			product_in_stock,
-			product_main_photo_id,
-			product_text
+			(`name`,
+			`manufacturer_code`,
+			`url`,
+			`brand`,
+			`category`,
+			`price`,
+			`currency`,
+			`weight`,
+			`show`,
+			`in_stock`,
+			`main_photo_id`,
+			`text`
 			)
-			VALUES(?,?,?,?d,?d,?,?,?,?,?d,?)
+			VALUES(?, ?, ?, ?d, ?d, ?, ?d, ?d, ?d, ?d, ?d, ?)
 		";
-        $nId = $this->oDb->query(
-            $sql, $oProduct->getName(), $oProduct->getManufacturerCode(), 
-			$oProduct->getURL(), $oProduct->getBrand(), $oProduct->getCategory(), 
-			$oProduct->getPrice(), $oProduct->getWeight(), $oProduct->getShow(), 
-			$oProduct->getInStock(), $oProduct->getMainPhotoId(), $oProduct->getText()
+        $iId = $this->oDb->query(
+            $sql,
+			$oProduct->getName(),
+			$oProduct->getManufacturerCode(),
+			$oProduct->getURL(),
+			$oProduct->getBrand(),
+			$oProduct->getCategory(),
+			$oProduct->getPrice(),
+			$oProduct->getCurrency(),
+			$oProduct->getWeight(),
+			$oProduct->getShow(),
+			$oProduct->getInStock(),
+			$oProduct->getMainPhotoId(),
+			$oProduct->getText()
         );
-        if ($nId) {
-            return $nId;
+        if ($iId) {
+            return $iId;
         }
         return false;
     }
 	
+    /**
+     * Обновление товара
+     *
+     * @param PluginMinimarket_ModuleProduct_EntityProduct $oProduct    Объект товара
+     * 
+     * return  bool
+     */
     public function UpdateProduct(PluginMinimarket_ModuleProduct_EntityProduct $oProduct) {
 		$sql = "UPDATE " . Config::Get('db.table.minimarket_product') . "
 			SET 
-				product_name = ?,
-				product_manufacturer_code = ?,
-				product_url = ?,
-				product_brand = ?d,
-				product_category = ?d,
-				product_price = ?,
-				product_weight = ?,
-				product_show = ?d,
-				product_in_stock = ?d,
-				product_main_photo_id = ?d,
-				product_text = ?
+				`name` = ?,
+				`manufacturer_code` = ?,
+				`url` = ?,
+				`brand` = ?d,
+				`category` = ?d,
+				`price` = ?,
+				`currency` = ?d,
+				`weight` = ?d,
+				`show` = ?d,
+				`in_stock` = ?d,
+				`main_photo_id` = ?d,
+				`text` = ?
 			WHERE
-				product_id = ?d
+				`id` = ?d
 		";
         $bResult = $this->oDb->query(
-            $sql, $oProduct->getName(), $oProduct->getManufacturerCode(), $oProduct->getURL(), $oProduct->getBrand(),
-			$oProduct->getCategory(), $oProduct->getPrice(), $oProduct->getWeight(), 
-			$oProduct->getShow(), $oProduct->getInStock(), $oProduct->getMainPhotoId(), $oProduct->getText(), $oProduct->getId()
+            $sql,
+			$oProduct->getName(),
+			$oProduct->getManufacturerCode(),
+			$oProduct->getURL(),
+			$oProduct->getBrand(),
+			$oProduct->getCategory(),
+			$oProduct->getPrice(),
+			$oProduct->getCurrency(),
+			$oProduct->getWeight(), 
+			$oProduct->getShow(),
+			$oProduct->getInStock(),
+			$oProduct->getMainPhotoId(),
+			$oProduct->getText(),
+			$oProduct->getId()
         );
 		return $bResult !== false;
 	}
-	
-	public function getProductByURL($sURL) {
+
+    /**
+     * Возвращает "голый" товар по УРЛ
+     *
+     * @param int $sURL    УРЛ товара
+     * 
+     * return PluginMinimarket_Product_Product|bool
+     */	
+	public function GetProductByURL($sURL) {
         $sql = "SELECT
 						*
 					FROM
 						" . Config::Get('db.table.minimarket_product') . "
 					WHERE
-						product_url = ?
+						`url` = ?
 					";
         if ($aRow = $this->oDb->selectRow($sql, $sURL)) {
             return Engine::GetEntity('PluginMinimarket_Product_Product', $aRow);
         }
         return false;
 	}
-	
-	public function getProductById($sId) {
+
+    /**
+     * Возвращает "голый" товар по ID
+     *
+     * @param int $iId    ID товара
+     * 
+     * return PluginMinimarket_Product_Product|bool
+     */	
+	public function GetProductById($iId) {
         $sql = "SELECT
 						*
 					FROM
 						" . Config::Get('db.table.minimarket_product') . "
 					WHERE
-						product_id = ?d
+						`id` = ?d
 					";
-        if ($aRow = $this->oDb->selectRow($sql, $sId)) {
+        if ($aRow = $this->oDb->selectRow($sql, $iId)) {
             return Engine::GetEntity('PluginMinimarket_Product_Product', $aRow);
         }
         return false;
 	}
-	
+
+    /**
+     * Возвращает "голые" товары по списку ID товаров
+     *
+     * @param array $aProductId    Список ID товаров
+     * 
+     * return array
+     */	
 	public function GetProductsByArrayId($aProductId) {
-        if (!is_array($aProductId) || count($aProductId) == 0) {
-            return array();
-        }
+        if (!is_array($aProductId) || count($aProductId) == 0) return array();
         $sql = "SELECT
 						*
 					FROM
 						" . Config::Get('db.table.minimarket_product') . "
 					WHERE
-						product_id IN(?a)
-					ORDER BY product_price DESC
+						`id` IN (?a)
+					ORDER BY `price` DESC
 					";
-        $aProducts = array();
+        $aProduct = array();
         if ($aRows = $this->oDb->select($sql, $aProductId)) {
-            foreach ($aRows as $aProduct) {
-                $aProducts[] = Engine::GetEntity('PluginMinimarket_Product_Product', $aProduct);
+            foreach ($aRows as $aRow) {
+                $aProduct[] = Engine::GetEntity('PluginMinimarket_Product_Product', $aRow);
             }
         }
-        return $aProducts;
+        return $aProduct;
 	}
-	
-	public function getArrayProductPropertyIdByArrayProductId($aProductId) {
-        if (!is_array($aProductId) || count($aProductId) == 0) {
-            return array();
-        }
-        $sql = "SELECT
-						product_id,property_id
-					FROM
-						" . Config::Get('db.table.minimarket_product_property') . "
-					WHERE
-						product_id IN(?a)
-					";
-        $aProperties = array();
-        if ($aRows = $this->oDb->select($sql, $aProductId)) {
-            foreach ($aRows as $aProperty) {
-                $aProperties[$aProperty['product_id']][] = $aProperty['property_id'];
-            }
-        }
-        return $aProperties;
-	}
-	
-	public function GetArrayProductTaxonomyByType($sType) {
+
+    /**
+     * Возвращает список таксономий продукта по типу таксономии
+     *
+     * @param string $sType    Тип таксономий
+     *
+     * @return array
+     */
+	public function GetProductTaxonomiesByType($sType) {
         $sql = "SELECT
 						*
 					FROM
 						" . Config::Get('db.table.minimarket_product_taxonomy') . "
 					WHERE
-						product_taxonomy_type = ?
+						`type` = ?
 					";
         $aResult = array();
-        if ($aRows = $this->oDb->select($sql, $sType)) {
+        if ($aRows = $this->oDb->select(
+			$sql, 
+			$sType
+		)) {
             foreach ($aRows as $aRow) {
                 $aResult[] = Engine::GetEntity('PluginMinimarket_Product_ProductTaxonomy', $aRow);
             }
         }
         return $aResult;
 	}
-	
-	public function GetArrayProductTaxonomyByArrayProductIdAndType($aProductId, $sType) {
+
+    /**
+     * Возвращает список таксономий продукта по списку ID продуктов и типу
+     *
+     * @param array  $aProductId    Список ID продуктов
+     * @param string $sType         Тип таксономий
+     *
+     * @return array
+     */	
+	public function GetProductTaxonomiesByArrayProductIdAndType($aProductId, $sType) {
         if (!is_array($aProductId) || count($aProductId) == 0) {
             return array();
         }
@@ -159,10 +212,16 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
 					FROM
 						" . Config::Get('db.table.minimarket_product_taxonomy') . "
 					WHERE
-						product_id IN ( ?a ) AND product_taxonomy_type = ?
+						`product_id` IN (?a) 
+						AND `type` = ?
 					";
         $aResult = array();
-        if ($aRows = $this->oDb->select($sql, $aProductId, $sType)) {
+        if ($aRows = $this->oDb->select(
+				$sql, 
+				$aProductId, 
+				$sType
+			)
+		) {
             foreach ($aRows as $aRow) {
 				$oProductTaxonomy = Engine::GetEntity('PluginMinimarket_Product_ProductTaxonomy', $aRow);
                 $aResult[$oProductTaxonomy->getProductId()][] = $oProductTaxonomy;
@@ -170,21 +229,31 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
         }
         return $aResult;
 	}
-	
+
+    /**
+     * Список товаров по фильтру
+     *
+     * @param array $aFilter      Фильтр
+     * @param int   $iCount       Возвращает общее число элементов
+     * @param int   $iPage        Номер страницы
+     * @param int   $iPerPage     Количество элементов на страницу
+     *
+     * @return array
+     */
 	public function GetProducts($aFilter, &$iCount, $iPage, $iPerPage) {
-		$sWhere = $this->buildFilter($aFilter);
+		$sWhere = $this->BuildFilter($aFilter);
 		if(isset($aFilter['pros']) && !empty($aFilter['pros'])) {
 			$sql = "SELECT
-							p.product_id, COUNT(p.product_id) AS c
+							p.`id`, COUNT(p.`id`) AS c
 						FROM
 							" . Config::Get('db.table.minimarket_product') . " as p,
-							" . Config::Get('db.table.minimarket_product_property') . " as pp
+							" . Config::Get('db.table.minimarket_link') . " as t
 						WHERE
 							1=1
 							" . $sWhere . "
-							AND p.product_id = pp.product_id
-							AND pp.property_id IN (?a)
-						GROUP BY p.product_id
+							AND p.`id` = t.`parent_id`
+							AND t.`object_id` IN (?a)
+						GROUP BY p.`id`
 						HAVING c = ?
 						LIMIT 
 							?d, ?d
@@ -192,35 +261,43 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
 			$aProducts=array();
 			if ($aRows = $this->oDb->selectPage($iCount, $sql, $aFilter['pros'], count($aFilter['pros']), ($iPage - 1) * $iPerPage, $iPerPage)) {
 				foreach ($aRows as $aProduct) {
-					$aProducts[] = $aProduct['product_id'];
+					$aProducts[] = $aProduct['id'];
 				}
 			}
 		} elseif(isset($aFilter['lover']) && !empty($aFilter['lover'])) {
 			$sql = "SELECT
-							p.product_id, COUNT(p.product_id) AS c
+							p.`id`, COUNT(p.`id`) AS c
 						FROM
 							" . Config::Get('db.table.minimarket_product') . " as p,
 							" . Config::Get('db.table.minimarket_product_taxonomy') . " as pt
 						WHERE
 							1=1
 							" . $sWhere . "
-							AND p.product_id = pt.product_id
-							AND pt.product_taxonomy_text IN (?a)
-							AND pt.product_taxonomy_type = ?
-						GROUP BY p.product_id
+							AND p.`id` = pt.`product_id`
+							AND pt.`text` IN (?a)
+							AND pt.`type` = ?
+						GROUP BY p.`id`
 						HAVING c = ?
 						LIMIT 
 							?d, ?d
 						";
 			$aProducts=array();
-			if ($aRows = $this->oDb->selectPage($iCount, $sql, $aFilter['lover'], 'features', count($aFilter['lover']), ($iPage - 1) * $iPerPage, $iPerPage)) {
+			if ($aRows = $this->oDb->selectPage(
+					$iCount, 
+					$sql, 
+					$aFilter['lover'], 
+					'features', 
+					count($aFilter['lover']), 
+					($iPage - 1) * $iPerPage, $iPerPage
+				)
+			) {
 				foreach ($aRows as $aProduct) {
-					$aProducts[] = $aProduct['product_id'];
+					$aProducts[] = $aProduct['id'];
 				}
 			}			
 		} else {
 			$sql = "SELECT
-							product_id
+							`id`
 						FROM
 							" . Config::Get('db.table.minimarket_product') . "
 						WHERE
@@ -232,95 +309,119 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
 			$aProducts=array();
 			if ($aRows = $this->oDb->selectPage($iCount, $sql, ($iPage - 1) * $iPerPage, $iPerPage)) {
 				foreach ($aRows as $aProduct) {
-					$aProducts[] = $aProduct['product_id'];
+					$aProducts[] = $aProduct['id'];
 				}
 			}
 		}
 		return $aProducts;
 	}
 	
-	protected function buildFilter($aFilter) {
+    /**
+     * Строит строку условий для SQL запроса товаров
+     *
+     * @param array $aFilter    Фильтр
+     *
+     * @return string
+     */
+	protected function BuildFilter($aFilter) {
 		$sWhere = '';
         if (isset($aFilter['in_category'])) {
             if (!is_array($aFilter['in_category'])) {
                 $aFilter['in_category'] = array($aFilter['in_category']);
             }
 			$sPrefix = isset($aFilter['pros'])?"p.":"";
-            $sWhere .= " AND ".$sPrefix."product_category IN ('" . join("','", $aFilter['in_category']) . "')";
+            $sWhere .= " AND ".$sPrefix."`category` IN ('" . join("','", $aFilter['in_category']) . "')";
+        }
+        if (isset($aFilter['currency'])) {
+            if (!is_array($aFilter['currency'])) {
+                $aFilter['currency'] = array($aFilter['currency']);
+            }
+            $sWhere .= " AND `currency` IN ('" . join("','", $aFilter['currency']) . "')";
         }
 		return $sWhere;
 	}
 	
+    /**
+     * Добавление таксономии товара
+     *
+     * @param PluginMinimarket_ModuleProduct_EntityProductTaxonomy $oProductTaxonomy    Объект таксономии товара
+     *
+     * @return int|bool
+     */
 	public function AddProductTaxonomy(PluginMinimarket_ModuleProduct_EntityProductTaxonomy $oProductTaxonomy) {
-        $sql = "INSERT INTO " . Config::Get('db.table.minimarket_product_taxonomy') . "
-			(product_id,
-			product_taxonomy_text,
-			product_taxonomy_type
-			)
-			VALUES(	?d,	?,	?)
+        $sql = "INSERT INTO 
+					" . Config::Get('db.table.minimarket_product_taxonomy') . "
+					(`product_id`,
+					`text`,
+					`type`
+					)
+				VALUES (?d, ?, ?)
 		";
         if ($iId = $this->oDb->query(
             $sql,
             $oProductTaxonomy->getProductId(),
-            $oProductTaxonomy->getProductTaxonomyText(),
-            $oProductTaxonomy->getProductTaxonomyType()
+            $oProductTaxonomy->getText(),
+            $oProductTaxonomy->getType()
         )
         ) {
-            $oProductTaxonomy->setProductTaxonomyId($iId);
+            $oProductTaxonomy->setId($iId);
             return $iId;
         }
         return false;
 	}
-	
-	public function AddProductProperty(PluginMinimarket_ModuleProduct_EntityProductProperty $oProductProperty) {
-        $sql = "INSERT INTO " . Config::Get('db.table.minimarket_product_property') . "
-			(product_id,
-			property_id
-			)
-			VALUES(	?d,	?d)
+
+    /**
+     * Удаление таксономии товара по ID товара и типу таксономии
+     *
+     * @param int    $iId      ID товара
+     * @param string $sType    Тип таксономии
+     * 
+     * @return bool
+     */
+	public function DeleteProductTaxonomyByProductIdAndType($iId, $sType) {
+        $sql = "DELETE FROM 
+					" . Config::Get('db.table.minimarket_product_taxonomy') . "
+				WHERE
+					`product_id` = ?d 
+					AND `type` = ?
 		";
-        if ($iId = $this->oDb->query(
-            $sql,
-            $oProductProperty->getProductId(),
-            $oProductProperty->getPropertyId()
-        )
-        ) {
-            $oProductProperty->setProductPropertyId($iId);
-            return $iId;
-        }
-        return false;
+        return $this->oDb->query(
+			$sql, 
+			$iId, 
+			$sType
+		) !== false;
 	}
-	
-	public function DeleteProductTaxonomyByProductIdAndType($sId, $sType) {
-        $sql = "DELETE FROM " . Config::Get('db.table.minimarket_product_taxonomy') . "
-			WHERE
-				product_id = ?d AND product_taxonomy_type = ?
-		";
-        return $this->oDb->query($sql, $sId, $sType) !== false;
-	}
-	
-	public function DeleteProductPropertyByProductId($sId) {
-        $sql = "DELETE FROM " . Config::Get('db.table.minimarket_product_property') . "
-			WHERE
-				product_id = ?d
-		";
-        return $this->oDb->query($sql, $sId) !== false;
-	}
-	
-	public function GetProductTaxonomiesByLike($sProductTaxonomy,$iLimit,$sType) {
-		$sProductTaxonomy=mb_strtolower($sProductTaxonomy,'UTF-8');
+
+    /**
+     * Получает список таксономий товара по первым буквам и типу таксономии
+     *
+     * @param string $sProductTaxonomy    Таксономия
+     * @param int    $iLimit              Количество
+     * @param string $sType               Тип таксономии
+     *
+     * @return array
+     */
+	public function GetProductTaxonomiesByLike($sProductTaxonomy, $iLimit, $sType) {
+		$sProductTaxonomy = mb_strtolower($sProductTaxonomy, 'UTF-8');
         $sql = "SELECT
-				product_taxonomy_text
+				`text`
 			FROM
 				" . Config::Get('db.table.minimarket_product_taxonomy') . "
 			WHERE
-				product_taxonomy_text LIKE ? AND product_taxonomy_type = ?
+				`text` LIKE ? 
+				AND `type` = ?
 			GROUP BY 
-				product_taxonomy_text
+				`text`
 			LIMIT 0, ?d
 			";
         $aReturn = array();
-        if ($aRows = $this->oDb->select($sql,$sProductTaxonomy.'%',$sType,$iLimit)) {
+        if ($aRows = $this->oDb->select(
+				$sql, 
+				$sProductTaxonomy . '%', 
+				$sType, 
+				$iLimit
+			)
+		) {
             foreach ($aRows as $aRow) {
                 $aReturn[] = Engine::GetEntity('PluginMinimarket_Product_ProductTaxonomy', $aRow);
             }
@@ -336,59 +437,83 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
      * @return array
      */
     public function getPhotosByTargetTmp($sTargetTmp) {
-        $sql = 'SELECT * FROM ' . Config::Get('db.table.minimarket_product_photo') . ' WHERE product_photo_target_tmp = ?';
-        $aPhotos = $this->oDb->select($sql, $sTargetTmp);
+        $sql = 'SELECT
+					*
+				FROM 
+					' . Config::Get('db.table.minimarket_product_photo') . ' 
+				WHERE 
+					`target_tmp` = ?
+				';
+        $aRows = $this->oDb->select(
+			$sql,
+			$sTargetTmp
+		);
         $aReturn = array();
-        if (is_array($aPhotos) && count($aPhotos)) {
-            foreach ($aPhotos as $aPhoto) {
-                $aReturn[] = Engine::GetEntity('PluginMinimarket_Product_ProductPhoto', $aPhoto);
+        if (is_array($aRows) && count($aRows)) {
+            foreach ($aRows as $aRow) {
+                $aReturn[] = Engine::GetEntity('PluginMinimarket_Product_ProductPhoto', $aRow);
             }
         }
         return $aReturn;
     }
 	
     /**
-     * Обновить данные по изображению
+     * Обновление данных по изображению
      *
-     * @param PluginMinimarket_ModuleProduct_EntityProductPhoto $oPhoto Объект фото
-     *
-     * @return  bool
+     * @param PluginMinimarket_ModuleProduct_EntityProductPhoto $oPhoto    Объект фото
+     * 
+     * @return  int|bool
      */
-    public function updateProductPhoto($oPhoto) {
-        if (!$oPhoto->getProductId() && !$oPhoto->getProductPhotoTargetTmp()) {
+    public function UpdateProductPhoto($oPhoto) {
+        if (!$oPhoto->getProductId() && !$oPhoto->getTargetTmp()) {
             return false;
         }
         if ($oPhoto->getProductId()) {
-            $oPhoto->setProductPhotoTargetTmp = null;
+            $oPhoto->setTargetTmp = null;
         }
-        $sql = 'UPDATE ' . Config::Get('db.table.minimarket_product_photo') . ' SET
-                        product_photo_path = ?, 
-						product_photo_description = ?, 
-						product_id = ?d, 
-						product_photo_target_tmp=? 
-					WHERE 
-						product_photo_id = ?d';
+        $sql = 'UPDATE 
+					' . Config::Get('db.table.minimarket_product_photo') . ' 
+				SET
+					`path` = ?, 
+					`description` = ?, 
+					`product_id` = ?d, 
+					`target_tmp` = ?
+				WHERE 
+					`id` = ?d ';
         $bResult = $this->oDb->query(
-            $sql, $oPhoto->getProductPhotoPath(), $oPhoto->getProductPhotoDescription(), 
-			$oPhoto->getProductId(), $oPhoto->getProductPhotoTargetTmp(),
-            $oPhoto->getProductPhotoId()
+            $sql,
+			$oPhoto->getPath(),
+			$oPhoto->getDescription(), 
+			$oPhoto->getProductId(), 
+			$oPhoto->getTargetTmp(),
+            $oPhoto->getId()
         );
         return $bResult !== false;
     }
 	
     /**
-     * Получить список изображений по id продукта
+     * Возвращает список изображений по ID продукта
      *
-     * @param int      $iProductId	ID продукта
-     * @param int|null $iFromId     ID с которого начинать выборку
-     * @param int|null $iCount      Количество
+     * @param int      $iProductId    ID продукта
+     * @param int|null $iFromId       ID с которого начинать выборку
+     * @param int|null $iCount        Количество
      *
      * @return array
      */
-    public function getPhotosByProductId($iProductId, $iFromId, $iCount) {
-        $sql = 'SELECT * FROM ' . Config::Get('db.table.minimarket_product_photo') . 
-			' WHERE product_id = ?d {AND product_photo_id > ?d LIMIT 0, ?d}';
-        $aPhotos = $this->oDb->select($sql, $iProductId, ($iFromId !== null) ? $iFromId : DBSIMPLE_SKIP, $iCount);
+    public function GetPhotosByProductId($iProductId, $iFromId, $iCount) {
+        $sql = 'SELECT 
+					* 
+				FROM 
+					' . Config::Get('db.table.minimarket_product_photo') . ' 
+				WHERE 
+					`product_id` = ?d 
+					{AND `id` > ?d LIMIT 0, ?d}';
+        $aPhotos = $this->oDb->select(
+			$sql, 
+			$iProductId, 
+			($iFromId !== null) ? $iFromId : DBSIMPLE_SKIP,
+			$iCount
+		);
         $aReturn = array();
         if (is_array($aPhotos) && count($aPhotos)) {
             foreach ($aPhotos as $aPhoto) {
@@ -397,61 +522,78 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
         }
         return $aReturn;
     }
-	
+
     /**
-     * Получить число изображений по id продукта
+     * Возвращает число изображений по временному ключу
      *
      * @param string $sTargetTmp    Временный ключ
      *
      * @return int
      */
-    public function getCountPhotosByTargetTmp($sTargetTmp) {
-        $sql = 'SELECT COUNT(product_photo_id) FROM ' . Config::Get('db.table.minimarket_product_photo') . 
-			' WHERE product_photo_target_tmp = ?';
-        $aPhotosCount = $this->oDb->selectCol($sql, $sTargetTmp);
+    public function GetCountPhotosByTargetTmp($sTargetTmp) {
+        $sql = 'SELECT 
+					COUNT(`id`) 
+				FROM 
+					' . Config::Get('db.table.minimarket_product_photo') . ' 
+				WHERE 
+					`target_tmp` = ?';
+        $aPhotosCount = $this->oDb->selectCol(
+			$sql,
+			$sTargetTmp
+		);
         return $aPhotosCount[0];
     }
 	
     /**
-     * Получить число изображений по id продукта
+     * Возвращает число изображений по ID товара
      *
-     * @param int $iProductId    ID продукта
+     * @param int $iProductId    ID товара
      *
      * @return int
      */
-    public function getCountPhotosByProductId($iProductId) {
-        $sql = 'SELECT COUNT(product_photo_id) FROM ' . Config::Get('db.table.minimarket_product_photo') . 
-			' WHERE product_id = ?d';
-        $aPhotosCount = $this->oDb->selectCol($sql, $iProductId);
+    public function GetCountPhotosByProductId($iProductId) {
+        $sql = 'SELECT
+					COUNT(`id`)
+				FROM 
+					' . Config::Get('db.table.minimarket_product_photo') . ' 
+				WHERE 
+					`product_id` = ?d';
+        $aPhotosCount = $this->oDb->selectCol(
+			$sql,
+			$iProductId
+		);
         return $aPhotosCount[0];
     }
 	
     /**
-     * Добавить к продукту изображение
+     * Добавляет к продукту изображение
      *
      * @param PluginMinimarket_ModuleProduct_EntityProductPhoto $oPhoto    Объект фото
      *
-     * @return bool
+     * @return bool|int
      */
-    public function addProductPhoto($oPhoto) {
-        if (!$oPhoto->getProductId() && !$oPhoto->getProductPhotoTargetTmp()) {
+    public function AddProductPhoto($oPhoto) {
+        if (!$oPhoto->getProductId() && !$oPhoto->getTargetTmp()) {
             return false;
         }
-        $sTargetType = ($oPhoto->getProductId()) ? 'product_id' : 'product_photo_target_tmp';
-        $iTargetId = ($sTargetType == 'product_id') ? $oPhoto->getProductId() : $oPhoto->getProductPhotoTargetTmp();
-        $sql = 'INSERT INTO ' . Config::Get('db.table.minimarket_product_photo') . ' SET
-                        product_photo_path = ?, 
-						product_photo_description = ?, ?# = ?';
-        return $this->oDb->query($sql, 
-			$oPhoto->getProductPhotoPath(), 
-			$oPhoto->getProductPhotoDescription(), 
+        $sTargetType = $oPhoto->getProductId() ? 'product_id' : 'target_tmp';
+        $iTargetId = ($sTargetType == 'product_id') ? $oPhoto->getProductId() : $oPhoto->getTargetTmp();
+        $sql = 'INSERT INTO 
+					' . Config::Get('db.table.minimarket_product_photo') . ' 
+				SET
+					`path` = ?, 
+					`description` = ?, ?# = ?';
+        return $this->oDb->query(
+			$sql, 
+			$oPhoto->getPath(), 
+			$oPhoto->getDescription(), 
 			$sTargetType, 
 			$iTargetId
 		);
     }
 	
     /**
-     * Возвращает список фотографий по списку id фоток
+     * Возвращает список фотографий по списку ID фотографий
      *
      * @param array $aPhotoId    Список ID фото
      *
@@ -461,16 +603,19 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
         if (!is_array($aPhotoId) || count($aPhotoId) == 0) {
             return array();
         }
-
         $sql = "SELECT
 					*
 				FROM 
 					" . Config::Get('db.table.minimarket_product_photo') . "
 				WHERE 
-					product_photo_id IN(?a)
-				ORDER BY FIELD(product_photo_id,?a) ";
+					`id` IN(?a)
+				ORDER BY FIELD (`id`, ?a) ";
         $aReturn = array();
-        if ($aRows = $this->oDb->select($sql, $aPhotoId, $aPhotoId)) {
+        if ($aRows = $this->oDb->select(
+			$sql, 
+			$aPhotoId, 
+			$aPhotoId)
+		) {
             foreach ($aRows as $aPhoto) {
                 $aReturn[] = Engine::GetEntity('PluginMinimarket_Product_ProductPhoto', $aPhoto);
             }
@@ -478,32 +623,36 @@ class PluginMinimarket_ModuleProduct_MapperProduct extends Mapper {
         return $aReturn;
     }
 	
-    /**
-     * Удалить изображение
+	/**
+     * Удаление изображения по ID
      *
      * @param int $iPhotoId    ID фото
      */
-    public function deleteProductPhoto($iPhotoId) {
-        $sql = "DELETE FROM " . Config::Get('db.table.minimarket_product_photo') . 
-			" WHERE  product_photo_id = ?d";
-        return $this->oDb->query($sql, $iPhotoId) !== false;
+    public function DeleteProductPhoto($iPhotoId) {
+        $sql = "DELETE FROM 
+					" . Config::Get('db.table.minimarket_product_photo') . 
+				" WHERE  
+					`id` = ?d";
+        return $this->oDb->query(
+			$sql, 
+			$iPhotoId
+		) !== false;
     }
 	
     /**
-     * Удаляет продукт
+     * Удаляет товар
      *
-     * @param   int   $nId - ID товара
+     * @param int $iId    ID товара
      *
-     * @return  bool
+     * @return bool
      */
-	public function deleteProduct($nId) {
+	public function DeleteProduct($iId) {
         $sql = "
             DELETE FROM " . Config::Get('db.table.minimarket_product') . "
             WHERE 
-				product_id = ?d
+				`id` = ?d
         ";
-        return $this->oDb->query($sql, $nId) !== false;
+        return $this->oDb->query($sql, $iId) !== false;
 	}
-	
 }
 ?>

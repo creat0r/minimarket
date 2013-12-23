@@ -18,7 +18,7 @@ class PluginMinimarket_ModuleGeo extends PluginMinimarket_Inherits_ModuleGeo {
 	 */
 	public function Init() {
 		parent::Init();
-		$this->oMapper=Engine::GetMapper(__CLASS__);
+		$this->oMapper = Engine::GetMapper(__CLASS__);
 		/**
 		 * Добавляем новый тип объекта
 		 */
@@ -37,7 +37,7 @@ class PluginMinimarket_ModuleGeo extends PluginMinimarket_Inherits_ModuleGeo {
     /**
      * Возвращает список регионов по списку стран
      *
-     * @param array $aCountries			Список ID стран
+     * @param array $aCountries    Список ID стран
      *
      * @return array
      */
@@ -48,7 +48,7 @@ class PluginMinimarket_ModuleGeo extends PluginMinimarket_Inherits_ModuleGeo {
     /**
      * Возвращает список городов по списку регионов
      *
-     * @param array $aRegions			Список ID регионов
+     * @param array $aRegions    Список ID регионов
      *
      * @return array
      */

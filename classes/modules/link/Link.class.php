@@ -23,7 +23,7 @@ class PluginMinimarket_ModuleLink extends Module {
     /**
      * Добавляет связь
      *
-     * @param PluginMinimarket_ModuleLink_EntityLink $oLink Объект связи
+     * @param PluginMinimarket_ModuleLink_EntityLink $oLink    Объект связи
      *
      * @return int|bool
      */
@@ -34,7 +34,7 @@ class PluginMinimarket_ModuleLink extends Module {
     /**
      * Добавляет массив связей одним запросом
      *
-     * @param array $aObjectCity			Массив связей
+     * @param array $aObjectCity    Массив связей
      *
      * @return int|bool
      */
@@ -45,37 +45,60 @@ class PluginMinimarket_ModuleLink extends Module {
     /**
      * Удаляет связи по ID родителя и типу объекта
      *
-     * @param int $nParentId			ID родителя
-     * @param string $sObjectType		Тип объекта
+     * @param int    $iParentId      ID родителя
+     * @param string $sObjectType    Тип объекта
      *
      * @return bool
      */
-	public function DeleteLinkByParentAndType($nParentId, $sObjectType) {
-		return $this->oMapper->DeleteLinkByParentAndType($nParentId, $sObjectType);
+	public function DeleteLinkByParentAndType($iParentId, $sObjectType) {
+		return $this->oMapper->DeleteLinkByParentAndType($iParentId, $sObjectType);
 	}
 	
     /**
      * Возвращает список связей по ID родителя и типу объекта
      *
-     * @param int $nParentId			ID родителя
-     * @param string $sObjectType		Тип объекта
+     * @param int    $iParentId      ID родителя
+     * @param string $sObjectType    Тип объекта
      *
      * @return array
      */
-	public function GetLinksByParentAndType($nParentId, $sObjectType) {
-		return $this->oMapper->GetLinksByParentAndType($nParentId, $sObjectType);
+	public function GetLinksByParentAndType($iParentId, $sObjectType) {
+		return $this->oMapper->GetLinksByParentAndType($iParentId, $sObjectType);
+	}
+	
+    /**
+     * Возвращает список ID связей по списку ID родителей и типу объекта
+     *
+     * @param int    $aParentId      ID родителя
+     * @param string $sObjectType    Тип объекта
+     *
+     * @return array
+     */
+    public function GetLinksByParentsAndType($aParentId, $sObjectType) {
+		return $this->oMapper->GetLinksByParentsAndType($aParentId, $sObjectType);
+    }
+	
+    /**
+     * Возвращает список связей по типу объекта
+     *
+     * @param string $sObjectType    Тип объекта
+     *
+     * @return array
+     */
+	public function GetLinksByType($sObjectType) {
+		return $this->oMapper->GetLinksByType($sObjectType);
 	}
 	
     /**
      * Возвращает списком количество повторений связей по ID родителя и типу объекта
      *
-     * @param int $nParentId			ID родителя
-     * @param string $sObjectType		Тип объекта
+     * @param int    $iParentId      ID родителя
+     * @param string $sObjectType    Тип объекта
      *
      * @return array
      */
-	public function GetCountLinksByParentAndType($nParentId, $sObjectType) {
-		return $this->oMapper->GetCountLinksByParentAndType($nParentId, $sObjectType);
+	public function GetCountLinksByParentAndType($iParentId, $sObjectType) {
+		return $this->oMapper->GetCountLinksByParentAndType($iParentId, $sObjectType);
 	}
 
 }

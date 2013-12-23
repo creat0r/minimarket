@@ -7,12 +7,12 @@
         <lang name="default">Stepanov Mark</lang>
     </author>
     <homepage>http://altocms.ru/profile/nikto/</homepage>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 	<alto>
 		<version>0.9.7.1</version>
 	</alto>
     <requires>
-        <livestreet></livestreet>
+        <livestreet>1.0.3</livestreet>
         <plugins>
         </plugins>
         <system>
@@ -20,7 +20,7 @@
         </system>
     </requires>
     <description>
-        <lang name="default">Реализация основных функций магазина</lang>
+        <lang name="default">Реализация основных функций интернет-магазина</lang>
     </description>
     <delegate>
         <module></module>

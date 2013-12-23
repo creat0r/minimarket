@@ -14,26 +14,26 @@
 		<div class="b-wbox">
 			<div class="b-wbox-header">
 				<div class="b-wbox-header-title">
-					{$aLang.plugin.minimarket.pay_system_cash_edit_title}
+					{$aLang.plugin.minimarket.admin_pay_system_cash_edit_title}
 				</div>
 			</div>
 			<div class="b-wbox-content nopadding">
 				<div class="control-group">
-					<label class="control-label" for="pay_system_cash_name">{$aLang.plugin.minimarket.pay_system_cash_name}:</label>
+					<label class="control-label" for="name">{$aLang.plugin.minimarket.name}:</label>
 					<div class="controls">
-						<input id="pay_system_cash_name" class="input-text" type="text" value="{$_aRequest.name}" name="name" />
+						<input id="name" class="input-text" type="text" value="{$_aRequest.name}" name="name" />
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="pay_system_cash_activation">{$aLang.plugin.minimarket.pay_system_cash_activation}:</label>
+					<label class="control-label" for="activation">{$aLang.plugin.minimarket.admin_pay_system_cash_activation}:</label>
 					<div class="controls">
-						<input type="checkbox" id="pay_system_cash_activation" name="activation" value="1" class="form_plugins_checkbox" {if $_aRequest.activation}checked {/if}/>
+						<input type="checkbox" id="activation" name="activation" value="1" class="form_plugins_checkbox" {if $_aRequest.activation}checked {/if}/>
 					</div>
 				</div>
 				<div class="b-wbox-content nopadding">
 					<div class="form-actions">
 						<button type="submit" class="btn btn-primary"
-								name="cash_submit">{$aLang.plugin.minimarket.pay_system_cash_submit}</button>
+								name="button_submit">{$aLang.plugin.minimarket.save}</button>
 					</div>
 				</div>
 			</div>

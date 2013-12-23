@@ -62,6 +62,7 @@
 			</tr>
 		</tbody>
 	</table>
+	<a class="button" href="{cfg name='path.root.web'}order/nulled/?security_ls_key={$ALTO_SECURITY_KEY}">{$aLang.plugin.minimarket.order_nulled}</a>
 	<button class="button button-primary" name="submit" type="submit">{$aLang.plugin.minimarket.order_next}</button>
 </form>
 {include file='footer.tpl'}

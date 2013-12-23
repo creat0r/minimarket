@@ -11,13 +11,13 @@
 
 class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
     /**
-     * Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+     * Ñîçäàíèå ñëóæáû äîñòàâêè
      *
-     * @param PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService			ÐžÐ±ÑŠÐµÐºÑ‚ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+     * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Îáúåêò ñëóæáû äîñòàâêè
      *
      * @return int|bool
      */
-	public function AddDeliveryService(PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService) {
+	public function AddDeliveryService(PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService) {
         $sql = "INSERT INTO " . Config::Get('db.table.minimarket_delivery_service') . "
 			(name,
 			activation,
@@ -30,16 +30,27 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 			processing_costs,
 			cost_calculation,
 			cost,
+			currency,
 			description,
 			type
 			)
-			VALUES(?,?d,?d,?d,?,?,?,?,?,?d,?,?,?)
+			VALUES(?,?d,?d,?d,?,?,?,?,?,?d,?,?d,?,?)
 		";
         $nId = $this->oDb->query(
-            $sql, $oDeliveryService->getName(), $oDeliveryService->getActivation(), $oDeliveryService->getTimeFrom(), 
-			$oDeliveryService->getTimeTo(), $oDeliveryService->getWeightFrom(), $oDeliveryService->getWeightTo(), 
-			$oDeliveryService->getOrderValueFrom(), $oDeliveryService->getOrderValueTo(), $oDeliveryService->getProcessingCosts(), 
-			$oDeliveryService->getCostCalculation(), $oDeliveryService->getCost(), $oDeliveryService->getDescription(),
+            $sql,
+			$oDeliveryService->getName(),
+			$oDeliveryService->getActivation(),
+			$oDeliveryService->getTimeFrom(),
+			$oDeliveryService->getTimeTo(),
+			$oDeliveryService->getWeightFrom(),
+			$oDeliveryService->getWeightTo(),
+			$oDeliveryService->getOrderValueFrom(),
+			$oDeliveryService->getOrderValueTo(),
+			$oDeliveryService->getProcessingCosts(),
+			$oDeliveryService->getCostCalculation(),
+			$oDeliveryService->getCost(),
+			$oDeliveryService->getCurrency(),
+			$oDeliveryService->getDescription(),
 			$oDeliveryService->getType()
         );
         if ($nId) {
@@ -49,9 +60,9 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 	}
 	
     /**
-     * Ð’Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ ÑÐ¿Ð¸ÑÐ¾Ðº ÑÐ»ÑƒÐ¶Ð± Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸ Ð¿Ð¾ Ñ‚Ð¸Ð¿Ñƒ
+     * Âîçâðàùàåò ñïèñîê ñëóæá äîñòàâêè ïî òèïó
      *
-	 * @param string $sType			Ð¢Ð¸Ð¿ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+	 * @param string $sType    Òèï ñëóæáû äîñòàâêè
      *
      * @return array
      */
@@ -64,58 +75,79 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 					type = ?
 					";
         $aDeliveryServices = array();
-        if ($aRows = $this->oDb->select($sql,$sType)) {
+        if ($aRows = $this->oDb->select($sql, $sType)) {
             foreach ($aRows as $aDeliveryService) {
-                $aDeliveryServices[] = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityService', $aDeliveryService);
+                $aDeliveryServices[] = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityDeliveryService', $aDeliveryService);
             }
         }
         return $aDeliveryServices;
 	}
 	
     /**
-     * Ð’Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ ÑÐ¿Ð¸ÑÐ¾Ðº Ð°ÐºÑ‚Ð¸Ð²Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ñ… ÑÐ»ÑƒÐ¶Ð± Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸ Ð¿Ð¾ ID Ð³Ð¾Ñ€Ð¾Ð´Ð°, Ð´Ð»Ñ ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ñ… Ð¾Ð½Ð¸ Ð°ÐºÑ‚ÑƒÐ°Ð»ÑŒÐ½Ñ‹ (Ð½Ð°ÑÑ‚Ñ€Ð°Ð¸Ð²Ð°ÐµÑ‚ÑÑ Ð² Ð°Ð´Ð¼Ð¸Ð½ÐºÐµ)
+     * Âîçâðàùàåò ñïèñîê àêòèâèðîâàííûõ ñëóæá äîñòàâêè ïî ID ãîðîäà, äëÿ êîòîðûõ îíè àêòóàëüíû (íàñòðàèâàåòñÿ â àäìèíêå)
      *
-	 * @param string $iCity			ID Ð³Ð¾Ñ€Ð¾Ð´Ð°
+	 * @param string $iCity    ID ãîðîäà
      *
      * @return array
      */
 	public function GetActivationDeliveryServicesByCity($iCity) {
-        $sql = "SELECT
-					*
+        $sql_lgc = "SELECT 
+					parent_id
 				FROM 
-					" . Config::Get('db.table.minimarket_delivery_service') . "
+					" . Config::Get('db.table.minimarket_link') . "
 				WHERE
-					id IN (
-						SELECT 
-								parent_id
-							FROM 
-								" . Config::Get('db.table.minimarket_link') . "
-							WHERE
-								object_id IN (
-									SELECT 
-										parent_id
-									FROM 
-										" . Config::Get('db.table.minimarket_link') . "
-									WHERE
-										object_id = ? AND object_type = 'location_group_city'
-								) AND object_type = 'delivery_service_location_group'
-					) AND activation = 1
+					object_id = ? AND object_type = 'location_group_city'
 					";
-        $aDeliveryServices = array();
-        if ($aRows = $this->oDb->select($sql,$iCity)) {
-            foreach ($aRows as $aDeliveryService) {
-                $aDeliveryServices[] = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityService', $aDeliveryService);
+        $aLocationGroupCity = array();
+        if ($aRows = $this->oDb->select($sql_lgc,$iCity)) {
+            foreach ($aRows as $aRow) {
+                $aLocationGroupCity[] = $aRow['parent_id'];
             }
         }
+				
+        $aDeliveryServiceLocationGroup = array();
+		if (!empty($aLocationGroupCity)) {
+			$sql_dslg = "SELECT 
+							parent_id
+						FROM 
+							" . Config::Get('db.table.minimarket_link') . "
+						WHERE
+							object_id IN ('" . join("', '", $aLocationGroupCity) . "') 
+							AND object_type = 'delivery_service_location_group' ";
+			if ($aRows = $this->oDb->select($sql_dslg,$iCity)) {
+				foreach ($aRows as $aRow) {
+					$aDeliveryServiceLocationGroup[] = $aRow['parent_id'];
+				}
+			}
+		}
+		
+        $aDeliveryServices = array();
+		if (!empty($aLocationGroupCity) && !empty($aDeliveryServiceLocationGroup)) {
+			$sql = "SELECT
+						*
+					FROM 
+						" . Config::Get('db.table.minimarket_delivery_service') . "
+					WHERE
+						id IN (
+							'" . join("', '", $aDeliveryServiceLocationGroup) . "'
+						) AND activation = 1
+						";
+			if ($aRows = $this->oDb->select($sql,$iCity)) {
+				foreach ($aRows as $aDeliveryService) {
+					$aDeliveryServices[] = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityDeliveryService', $aDeliveryService);
+				}
+			}
+		}
+		
         return $aDeliveryServices;
 	}
 	
     /**
-     * Ð’Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ Ð¾Ð±ÑŠÐµÐºÑ‚ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+     * Âîçâðàùàåò îáúåêò ñëóæáû äîñòàâêè
      *
-     * @param int $iId			ID ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+     * @param int $iId    ID ñëóæáû äîñòàâêè
      *
-     * @return PluginMinimarket_ModuleDelivery_EntityService|null
+     * @return PluginMinimarket_ModuleDelivery_EntityDeliveryService|null
      */
 	public function GetDeliveryServiceById($iId) {
         $sql = "SELECT
@@ -126,17 +158,17 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 						id = ?d
 					";
         if ($aRow = $this->oDb->selectRow($sql, $iId)) {
-            return Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityService', $aRow);
+            return Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityDeliveryService', $aRow);
         }
         return null;
 	}
 	
     /**
-     * Ð’Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ Ð¾Ð±ÑŠÐµÐºÑ‚ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸ Ð¿Ð¾ ÐºÐ»ÑŽÑ‡Ñƒ
+     * Âîçâðàùàåò îáúåêò ñëóæáû äîñòàâêè ïî êëþ÷ó
      *
-     * @param int $sKey			ÐšÐ»ÑŽÑ‡ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+     * @param int $sKey    Êëþ÷ ñëóæáû äîñòàâêè
      *
-     * @return PluginMinimarket_ModuleDelivery_EntityService|null
+     * @return PluginMinimarket_ModuleDelivery_EntityDeliveryService|null
      */
 	public function GetDeliveryServiceByKey($sKey) {
         $sql = "SELECT
@@ -147,19 +179,19 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 						`key` = ?
 					";
         if ($aRow = $this->oDb->selectRow($sql, $sKey)) {
-            return Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityService', $aRow);
+            return Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityDeliveryService', $aRow);
         }
         return null;
 	}
 	
     /**
-     * ÐžÐ±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ðµ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+     * Îáíîâëåíèå ñëóæáû äîñòàâêè
      *
-     * @param PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService			ÐžÐ±ÑŠÐµÐºÑ‚ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+     * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Îáúåêò ñëóæáû äîñòàâêè
      *
      * @return bool
      */
-	public function UpdateDeliveryService(PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService) {
+	public function UpdateDeliveryService(PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService) {
        $sql = "UPDATE " . Config::Get('db.table.minimarket_delivery_service') . "
 			SET 
 				name = ?,
@@ -173,15 +205,26 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 				processing_costs = ?,
 				cost_calculation = ?,
 				cost = ?,
+				currency = ?d,
 				description = ?
 			WHERE
 				id = ?d
 		";
         $bResult = $this->oDb->query(
-            $sql, $oDeliveryService->getName(), $oDeliveryService->getActivation(), $oDeliveryService->getTimeFrom(), 
-			$oDeliveryService->getTimeTo(), $oDeliveryService->getWeightFrom(), $oDeliveryService->getWeightTo(), 
-			$oDeliveryService->getOrderValueFrom(), $oDeliveryService->getOrderValueTo(), $oDeliveryService->getProcessingCosts(), 
-			$oDeliveryService->getCostCalculation(), $oDeliveryService->getCost(), $oDeliveryService->getDescription(), 
+            $sql,
+			$oDeliveryService->getName(),
+			$oDeliveryService->getActivation(),
+			$oDeliveryService->getTimeFrom(), 
+			$oDeliveryService->getTimeTo(),
+			$oDeliveryService->getWeightFrom(),
+			$oDeliveryService->getWeightTo(), 
+			$oDeliveryService->getOrderValueFrom(),
+			$oDeliveryService->getOrderValueTo(),
+			$oDeliveryService->getProcessingCosts(), 
+			$oDeliveryService->getCostCalculation(),
+			$oDeliveryService->getCost(),
+			$oDeliveryService->getCurrency(),
+			$oDeliveryService->getDescription(), 
 			$oDeliveryService->getId()
         );
         if ($bResult !== false) {
@@ -191,9 +234,9 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 	}
 	
     /**
-     * Ð£Ð´Ð°Ð»ÑÐµÑ‚ ÑÐ»ÑƒÐ¶Ð±Ñƒ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+     * Óäàëÿåò ñëóæáó äîñòàâêè
 	 *
-	 * @param PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService			ÐžÐ±ÑŠÐµÐºÑ‚ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+	 * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Îáúåêò ñëóæáû äîñòàâêè
      *
      * @return bool
      */
@@ -205,9 +248,10 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 	}
 	
     /**
-     * Ð£Ð´Ð°Ð»ÑÐµÑ‚ ÑÐ»ÑƒÐ¶Ð±Ñƒ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸ Ð¿Ð¾ ÐºÐ»ÑŽÑ‡Ñƒ
+     * Óäàëÿåò ñëóæáó äîñòàâêè ïî êëþ÷ó
 	 *
-	 * @param  $sKey			ÐšÐ»ÑŽÑ‡ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+	 * @param strung $sKey    Êëþ÷ ñëóæáû äîñòàâêè
+	 *
      * @return bool
      */
 	public function DeleteDeliveryServiceByKey($sKey) {
@@ -218,10 +262,10 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 	}
 	
     /**
-     * Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð½Ð¾Ð²Ð¾Ð¹ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
-     * Ð•ÑÐ»Ð¸ Ð·Ð°Ð¿Ð¸ÑÑŒ Ñ Ñ‚Ð°ÐºÐ¸Ð¼ ÑƒÐ½Ð¸ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¼ ÐºÐ»ÑŽÑ‡Ð¾Ð¼ ÑƒÐ¶Ðµ ÑÑƒÑ‰ÐµÑÑ‚Ð²ÑƒÐµÑ‚, Ñ‚Ð¾ Ð¾Ð±Ð½Ð¾Ð²Ð»ÑÐµÑ‚ ÐµÐµ
+     * Äîáàâëåíèå íîâîé ñëóæáû äîñòàâêè
+     * Åñëè çàïèñü ñ òàêèì óíèêàëüíûì êëþ÷îì óæå ñóùåñòâóåò, òî îáíîâëÿåò åå
      *
-	 * @param PluginMinimarket_ModuleDelivery_EntityService $oDeliveryService			ÐžÐ±ÑŠÐµÐºÑ‚ ÑÐ»ÑƒÐ¶Ð±Ñ‹ Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+	 * @param PluginMinimarket_ModuleDelivery_EntityDeliveryService $oDeliveryService    Îáúåêò ñëóæáû äîñòàâêè
      *
      * @return bool
      */
@@ -230,13 +274,15 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 			(`key`,
 			name,
 			activation,
+			currency,
 			description,
 			type
 			)
-			VALUES(?,?,?d,?,?)
+			VALUES(?,?,?d,?d,?,?)
 			ON DUPLICATE KEY UPDATE 
 				name = ?,
 				activation = ?d,
+				currency = ?d,
 				description = ?,
 				type = ?
 		";
@@ -245,10 +291,13 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 			$oDeliveryService->getKey(),
 			$oDeliveryService->getName(),
 			$oDeliveryService->getActivation(),
+			$oDeliveryService->getCurrency(),
 			$oDeliveryService->getDescription(),
 			$oDeliveryService->getType(),
+			
 			$oDeliveryService->getName(),
 			$oDeliveryService->getActivation(),
+			$oDeliveryService->getCurrency(),
 			$oDeliveryService->getDescription(),
 			$oDeliveryService->getType()
         );
@@ -259,9 +308,9 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
 	}
 	
     /**
-     * Ð’Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ ÑÐ¿Ð¸ÑÐ¾Ðº ÑÐ»ÑƒÐ¶Ð± Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸ Ð¿Ð¾ ÑÐ¿Ð¸ÑÐºÑƒ ID
+     * Âîçâðàùàåò ñïèñîê ñëóæá äîñòàâêè ïî ñïèñêó ID
      *
-	 * @param array $aDeliveryServiceId			Ð¡Ð¿Ð¸ÑÐ¾Ðº ID ÑÐ»ÑƒÐ¶Ð± Ð´Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸
+	 * @param array $aDeliveryServiceId    Ñïèñîê ID ñëóæá äîñòàâêè
      *
      * @return array
      */
@@ -279,11 +328,35 @@ class PluginMinimarket_ModuleDelivery_MapperDelivery extends Mapper {
         $aDeliveryServices = array();
         if ($aRows = $this->oDb->select($sql,$aDeliveryServiceId)) {
             foreach ($aRows as $aDeliveryService) {
-				$oDeliveryService = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityService', $aDeliveryService);
+				$oDeliveryService = Engine::GetEntity('PluginMinimarket_ModuleDelivery_EntityDeliveryService', $aDeliveryService);
                 $aDeliveryServices[$oDeliveryService->getId()] = $oDeliveryService;
             }
         }
         return $aDeliveryServices;
+	}
+	
+    /**
+     * Âîçâðàùàåò êîëè÷åñòâî ñëóæá äîñòàâêè ïî âàëþòå
+     *
+	 * @param string $iCurrency    ID âàëþòû
+     *
+     * @return array
+     */
+	public function GetCountDeliveryServicesByCurrency($iCurrency) {
+        $sql = "SELECT
+					COUNT(*) as count
+				FROM
+					" . Config::Get('db.table.minimarket_delivery_service') . "
+				WHERE
+					`currency` = ?d
+				";
+        $aRow = $this->oDb->selectRow(
+            $sql, $iCurrency
+        );
+        if ($aRow) {
+			return $aRow['count'];
+        }
+        return false;
 	}
 }
 ?>

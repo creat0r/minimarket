@@ -27,25 +27,21 @@ ls.minimarket = (function ($) {
 
 		var i, j, kw, kd, km;
 
-		// input sanitation & defaults
-		if( isNaN(decimals = Math.abs(decimals)) ){
+		if (isNaN(decimals = Math.abs(decimals))) {
 			decimals = 2;
 		}
-		if( dec_point == undefined ){
+		if (dec_point == undefined) {
 			dec_point = ",";
 		}
-		if( thousands_sep == undefined ){
+		if (thousands_sep == undefined) {
 			thousands_sep = ".";
 		}
-
-		i = parseInt(number = (+number || 0).toFixed(decimals)) + "";
-
-		if( (j = i.length) > 3 ){
+		i = parseInt (number = (+number || 0).toFixed(decimals)) + "";
+		if ((j = i.length) > 3) {
 			j = j % 3;
-		} else{
+		} else {
 			j = 0;
 		}
-
 		km = (j ? i.substr(0, j) + thousands_sep : "");
 		kw = i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands_sep);
 		kd = (decimals ? dec_point + Math.abs(number - i).toFixed(decimals).replace(/-/, 0).slice(2) : "");
@@ -56,18 +52,26 @@ ls.minimarket = (function ($) {
 	this.checkCart = function() {
 		var summ_products = 0;
 		$('.cart-count-input').each(function() {
-			var summ_product = parseFloat($(this).val()) * parseFloat($('[name="cart_price_hidden_'+$(this).attr('id').replace('cart_count_input_','')+'"]').val());
-			if (isNaN(summ_product)) summ_product = 0;
-			summ_products += summ_product;
+			var sum_product = parseFloat($(this).val()) * parseFloat($('[name="cart_price_hidden_'+$(this).attr('id').replace('cart_count_input_','')+'"]').val());
+			if (isNaN(sum_product)) sum_product = 0;
+			summ_products += sum_product;
 			var html = 0;
-			if (summ_product > 0) {
-				html = ls.minimarket.number_format(summ_product , 2, ',', ' ') + '&nbsp;$';
+			if (sum_product > 0) {
+				sum_product *= Math.pow(10, $('[name="cart_decimal_places"]').val());
+				sum_product = Math.floor(sum_product);
+				sum_product /= Math.pow(10, $('[name="cart_decimal_places"]').val());
+				html = $('[name="cart_format"]').val();
+				html = html.replace("#", ls.minimarket.number_format(sum_product, $('[name="cart_decimal_places"]').val(), ',', ' '));
 			}
 			$('#cart_price_'+$(this).attr('id').replace('cart_count_input_','')).html(html);
 		});
 		var html = 0;
 		if (summ_products > 0) {
-			html = ls.minimarket.number_format(summ_products , 2, ',', ' ') + '&nbsp;$';
+			summ_products *= Math.pow(10, $('[name="cart_decimal_places"]').val());
+			summ_products = Math.floor(summ_products);
+			summ_products /= Math.pow(10, $('[name="cart_decimal_places"]').val());
+			html = $('[name="cart_format"]').val();
+			html = html.replace("#", ls.minimarket.number_format(summ_products, $('[name="cart_decimal_places"]').val(), ',', ' '));
 		}
 		$('.cart-final-price').html(html);
 	}
@@ -144,12 +148,13 @@ jQuery(document).ready(function($){
 	// ѕодсчет стоимости с учетом доставки
 	$(".order-delivery-radio").click(function() {
 		var idDeliveryService = $(this).attr('id').replace('order_delivery_radio_','');
-		var fCost = parseFloat($('[name="order_delivert_cost_hidden_'+idDeliveryService+'"]').val());
-		var fCartSum = parseFloat($('[name="order_delivert_final_cost_hidden"]').val());
+		var nCost = parseFloat($('[name="order_delivery_cost_hidden_'+idDeliveryService+'"]').val());
+		var nCartSum = parseFloat($('[name="cart_sum"]').val());
 		var html = 0;
-		if (fCartSum + fCost > 0) {
-			html = ls.minimarket.number_format(fCartSum + fCost, 2, ',', ' ') + '&nbsp;$'
+		if (nCartSum + nCost > 0) {
+			html = $('[name="currency_format"]').val();
+			html = html.replace("#", ls.minimarket.number_format(nCartSum + nCost, $('[name="currency_decimal_places"]').val(), ',', ' '));
 		}
-		$('.order-delivert-final-cost').html(html);
+		$('.order-delivery-final-cost').html(html);
 	});
 });

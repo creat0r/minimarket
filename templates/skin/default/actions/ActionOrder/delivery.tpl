@@ -15,7 +15,7 @@
 				<tr>
 					<td class="pr-30"><a href="{$oProduct->getWebPath()}" class="order-delivery-product-name-href">{$oProduct->getName()}</a></td>
 					<td class="pr-30">{$aCartObjects[$oProduct->getId()]}</td>
-					<td class="order-delivery-product-price">{if $aCartObjects[$oProduct->getId()]}{number_format($oProduct->getPrice()*$aCartObjects[$oProduct->getId()],2,',',' ')}&nbsp;${else}0{/if}</td>
+					<td class="order-delivery-product-price">{if $aCartObjects[$oProduct->getId()]}{$oProduct->getCartPriceCurrency()}{else}0{/if}</td>
 				</tr>
 			{/foreach}
 			<tr>
@@ -42,22 +42,26 @@
 						{/if}
 					</td>
 					<td class="order-delivery-price">
-						{if $oDeliveryService->getCost()}{number_format($oDeliveryService->getCost(),2,',',' ')}&nbsp;${else}0{/if}
-						<input type="hidden" name="order_delivert_cost_hidden_{$oDeliveryService->getId()}" value="{number_format($oDeliveryService->getCost(),2,'.','')}" />
+						{if $oDeliveryService->getCartCostCurrency()}{$oDeliveryService->getCartCostCurrency()}{else}0{/if}
+						<input type="hidden" name="order_delivery_cost_hidden_{$oDeliveryService->getId()}" value="{$oDeliveryService->getCartCost() / {cfg name='plugin.minimarket.settings.factor'}}" />
 					</td>
 				</tr>
 			{/foreach}
 			<tr>
-				<td class="order-delivert-final" colspan="4">
-					{$aLang.plugin.minimarket.order_delivery_sum}: <span class="order-delivert-final-cost">{if $oOrder->getCartSum() > 0}{number_format($oOrder->getCartSum(),2,',',' ')}&nbsp;${else}0{/if}</span>
-					<input type="hidden" name="order_delivert_final_cost_hidden" value="{$oOrder->getCartSum()}" />
+				<td class="order-delivery-final" colspan="4">
+					{$aLang.plugin.minimarket.order_delivery_sum}: <span class="order-delivery-final-cost">{if $aCartSumData.cart_sum_currency}{$aCartSumData.cart_sum_currency}{else}0{/if}</span>
+					<input type="hidden" name="cart_sum" value="{$aCartSumData.cart_sum / {cfg name='plugin.minimarket.settings.factor'}}" />
+					<input type="hidden" name="currency_format" value="{$aCartSumData.format}" />
+					<input type="hidden" name="currency_decimal_places" value="{$aCartSumData.decimal_places}" />
 				</td>
 			</tr>
 		</tbody>
 	</table>
+	<a class="button" href="{cfg name='path.root.web'}order/nulled/?security_ls_key={$ALTO_SECURITY_KEY}">{$aLang.plugin.minimarket.order_nulled}</a>
 	<button class="button button-primary" name="submit" type="submit">{$aLang.plugin.minimarket.order_next}</button>
 	{else}
-		{$aLang.plugin.minimarket.order_delivery_access_error}
+		{$aLang.plugin.minimarket.order_delivery_access_error}<br /><br />
+		<a class="button" href="{cfg name='path.root.web'}order/nulled/?security_ls_key={$ALTO_SECURITY_KEY}">{$aLang.plugin.minimarket.order_nulled}</a>
 	{/if}
 </form>
 {include file='footer.tpl'}

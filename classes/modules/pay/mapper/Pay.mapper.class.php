@@ -12,7 +12,7 @@
 class PluginMinimarket_ModulePay_MapperPay extends Mapper {
 
     /**
-     * Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІСЃРµС… СЃРёСЃС‚РµРј РѕРїР»Р°С‚С‹
+     * Возвращает список всех систем оплаты
      *
      * @return array
      */
@@ -32,9 +32,9 @@ class PluginMinimarket_ModulePay_MapperPay extends Mapper {
 	}
 	
     /**
-     * РџРѕР»СѓС‡Р°РµС‚ РѕР±СЉРµРєС‚ СЃРёСЃС‚РµРјС‹ РѕРїР»Р°С‚С‹ РїРѕ ID
+     * Получает объект системы оплаты по ID
      *
-	 * @param string $iId			ID СЃРёСЃС‚РµРјС‹ РѕРїР»Р°С‚С‹
+	 * @param string $iId    ID системы оплаты
      *
      * @return PluginMinimarket_ModulePay_EntityPaySystem|bool
      */
@@ -53,10 +53,10 @@ class PluginMinimarket_ModulePay_MapperPay extends Mapper {
 	}
 
     /**
-     * Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕР№ СЃРёСЃС‚РµРјС‹ РѕРїР»Р°С‚С‹
-     * Р•СЃР»Рё Р·Р°РїРёСЃСЊ СЃ С‚Р°РєРёРј СѓРЅРёРєР°Р»СЊРЅС‹Рј РєР»СЋС‡РѕРј СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚, С‚Рѕ РѕР±РЅРѕРІР»СЏРµС‚ РµРµ
+     * Добавление новой системы оплаты
+     * Если запись с таким уникальным ключом уже существует, то обновляет ее
      *
-	 * @param PluginMinimarket_ModulePay_EntityPaySystem $oPaySystem			РћР±СЉРµРєС‚ СЃРёСЃС‚РµРјС‹ РѕРїР»Р°С‚С‹
+	 * @param PluginMinimarket_ModulePay_EntityPaySystem $oPaySystem    Объект системы оплаты
      *
      * @return bool
      */
@@ -86,9 +86,10 @@ class PluginMinimarket_ModulePay_MapperPay extends Mapper {
 	}
 	
     /**
-     * РЈРґР°Р»РµРЅРёРµ СЃРёСЃС‚РµРјС‹ РѕРїР»Р°С‚С‹ РїРѕ РєР»СЋС‡Сѓ
+     * Удаление системы оплаты
      *
-	 * @param $sKey			РљР»СЋС‡ СЃРёСЃС‚РµРјС‹ РѕРїР»Р°С‚С‹
+	 * @param string $sKey    Ключ системы оплаты
+	 * 
      * @return bool
      */
 	public function DeletePaySystemByKey($sKey) {
@@ -100,9 +101,9 @@ class PluginMinimarket_ModulePay_MapperPay extends Mapper {
 	}
 	
     /**
-     * РџРѕР»СѓС‡Р°РµС‚ СЃРїРёСЃРѕРє РѕР±СЉРµРєС‚РѕРІ СЃРёСЃС‚РµРјС‹ РѕРїР»Р°С‚С‹ РїРѕ СЃРїРёСЃРєСѓ ID
+     * Получает список объектов систем оплаты по списку ID систем оплаты
      *
-	 * @param string $aId			РЎРїРёСЃРѕРє ID СЃРёСЃС‚РµРј РѕРїР»Р°С‚С‹
+	 * @param string $aId    Список ID систем оплаты
      *
      * @return array
      */
@@ -128,9 +129,9 @@ class PluginMinimarket_ModulePay_MapperPay extends Mapper {
 	}
 	
     /**
-     * Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РґРѕСЃС‚СѓРїРЅС‹С… СЃРёСЃС‚РµРј РѕРїР»Р°С‚С‹ РїРѕ РѕР±СЉРµРєС‚Сѓ Р·Р°РєР°Р·Р°
+     * Возвращает список доступных систем оплаты по объекту заказа
      *
-	 * @param PluginMinimarket_ModulePay_EntityPaySystem $oOrder			РћР±СЉРµРєС‚ СЃРёСЃС‚РµРјС‹ РѕРїР»Р°С‚С‹
+	 * @param PluginMinimarket_ModulePay_EntityPaySystem $oOrder    Объект системы оплаты
      *
      * @return array
      */
